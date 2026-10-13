@@ -1,0 +1,38 @@
+{
+  "name": "f1-bricks",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "F1 Bricks: fastest-lap tracker for Rag, Adam and Ben in F1 25 time trial.",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "vite",
+    "dev:demo": "vite --mode demo",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -b --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "geometry": "node scripts/generate-geometry.mjs"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.0"
+  },
+  "devDependencies": {
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/react": "^16.3.3",
+    "@types/node": "^22.20.5",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "jsdom": "^25.0.1",
+    "typescript": "^5.5.4",
+    "vite": "^5.4.0",
+    "vite-plugin-pwa": "^0.20.1",
+    "vitest": "^2.0.5"
+  }
+}

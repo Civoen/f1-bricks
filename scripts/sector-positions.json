@@ -1,0 +1,123 @@
+{
+  "_about": "Positions of the finish line (sf) and the sector 1/2 and 2/3 timing lines (s1, s2) as fractions of distance along each GeoJSON outline from its first point. Derived by aligning each circuit's fastest 2025 qualifying lap (Baku: 2025 race) from the OpenF1 API (https://openf1.org) \u2014 car position trace plus official sector times \u2014 to the outline. Regenerate with scripts/generate-geometry.mjs.",
+  "albert-park": {
+    "sf": 0.9972,
+    "s1": 0.3297,
+    "s2": 0.5998
+  },
+  "bahrain": {
+    "sf": 0.9778,
+    "s1": 0.3082,
+    "s2": 0.7151
+  },
+  "baku": {
+    "sf": 0.9861,
+    "s1": 0.321,
+    "s2": 0.6586
+  },
+  "barcelona": {
+    "sf": 0.9806,
+    "s1": 0.3276,
+    "s2": 0.7078
+  },
+  "cota": {
+    "sf": 0.9472,
+    "s1": 0.2489,
+    "s2": 0.6595
+  },
+  "hungaroring": {
+    "sf": 0.9417,
+    "s1": 0.3382,
+    "s2": 0.6924
+  },
+  "imola": {
+    "sf": 0.9611,
+    "s1": 0.3235,
+    "s2": 0.6504
+  },
+  "interlagos": {
+    "sf": 0.9944,
+    "s1": 0.2821,
+    "s2": 0.7292
+  },
+  "jeddah": {
+    "sf": 0.9972,
+    "s1": 0.337,
+    "s2": 0.6706
+  },
+  "las-vegas": {
+    "sf": 0.9778,
+    "s1": 0.248,
+    "s2": 0.5226
+  },
+  "lusail": {
+    "sf": 0.9556,
+    "s1": 0.3429,
+    "s2": 0.6365
+  },
+  "marina-bay": {
+    "sf": 0.0194,
+    "s1": 0.687,
+    "s2": 0.3175
+  },
+  "mexico-city": {
+    "sf": 0.9917,
+    "s1": 0.4398,
+    "s2": 0.7863
+  },
+  "miami": {
+    "sf": 0.9778,
+    "s1": 0.3142,
+    "s2": 0.6618
+  },
+  "monaco": {
+    "sf": 0.7444,
+    "s1": 0.06,
+    "s2": 0.483
+  },
+  "montreal": {
+    "sf": 0.0528,
+    "s1": 0.3014,
+    "s2": 0.6238
+  },
+  "monza": {
+    "sf": 0.9556,
+    "s1": 0.284,
+    "s2": 0.5991
+  },
+  "red-bull-ring": {
+    "sf": 0.9806,
+    "s1": 0.2629,
+    "s2": 0.6543
+  },
+  "shanghai": {
+    "sf": 0.9361,
+    "s1": 0.1965,
+    "s2": 0.4831
+  },
+  "silverstone": {
+    "sf": 0.5222,
+    "s1": 0.8327,
+    "s2": 0.2488
+  },
+  "spa": {
+    "sf": 0.9806,
+    "s1": 0.3048,
+    "s2": 0.7057
+  },
+  "suzuka": {
+    "sf": 0.9639,
+    "s1": 0.3428,
+    "s2": 0.7754
+  },
+  "yas-marina": {
+    "sf": 0.9778,
+    "s1": 0.2072,
+    "s2": 0.6518
+  },
+  "zandvoort": {
+    "sf": 0.0222,
+    "s1": 0.3714,
+    "s2": 0.7135
+  }
+}
