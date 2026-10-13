@@ -7,7 +7,7 @@ import { formatGap, formatLapTime, formatSeconds } from '../lib/laptime';
 import { threatFor } from '../lib/records';
 import { useData } from '../state/data';
 
-type Filter = 'all' | 'untouched' | 'missing' | 'threat' | `holder:${string}`;
+type Filter = 'all' | 'missing' | 'threat' | `holder:${string}`;
 type Sort = 'calendar' | 'alpha' | 'closest' | 'recent';
 
 export function Circuits() {
@@ -21,8 +21,7 @@ export function Circuits() {
     let out = summaries.filter((s) =>
       !term || [s.circuit.name, s.circuit.short_name, s.circuit.country ?? '', s.circuit.code].some((v) => v.toLowerCase().includes(term))
     );
-    if (filter === 'untouched') out = out.filter((s) => s.lapCount === 0);
-    else if (filter === 'missing') out = out.filter((s) => !s.allThreeSet);
+    if (filter === 'missing') out = out.filter((s) => !s.allThreeSet);
     else if (filter === 'threat') out = out.filter((s) => threatFor(s));
     else if (filter.startsWith('holder:')) out = out.filter((s) => s.record?.player_id === filter.slice(7));
     const sorted = [...out];
@@ -35,13 +34,11 @@ export function Circuits() {
   if (!snapshot && loading) return <LoadingState />;
   if (!snapshot) return <ErrorState message={error ?? 'Unknown error'} onRetry={() => void refresh()} />;
 
-  const set = summaries.filter((s) => s.record).length;
-
   return (
     <div className="page">
       <div className="page-head">
         <div>
-          <div className="eyebrow">{summaries.length} circuits · {set} with a record · {summaries.filter((s) => s.allThreeSet).length} with all three times</div>
+          <div className="eyebrow">{summaries.length} circuits · {summaries.filter((s) => s.allThreeSet).length} with all three times</div>
           <h1 className="page-title">Circuits</h1>
         </div>
         <Link to="/log" className="btn btn-primary">LOG A LAP</Link>
@@ -59,7 +56,6 @@ export function Circuits() {
           ))}
           <button type="button" className="pill" aria-pressed={filter === 'threat'} onClick={() => setFilter('threat')}>Under threat</button>
           <button type="button" className="pill" aria-pressed={filter === 'missing'} onClick={() => setFilter('missing')}>Missing times</button>
-          <button type="button" className="pill" aria-pressed={filter === 'untouched'} onClick={() => setFilter('untouched')}>No laps yet</button>
         </div>
         <label className="sr-only" htmlFor="circuit-sort">Sort</label>
         <select id="circuit-sort" className="select" value={sort} onChange={(e) => setSort(e.target.value as Sort)} style={{ marginLeft: 'auto' }}>
@@ -115,9 +111,7 @@ export function Circuits() {
                       <span>{s.allThreeSet ? 'All three set' : `${players.length - s.playersWithTimes} missing`}</span>
                     </div>
                   </>
-                ) : (
-                  <div className="muted" style={{ fontSize: 14 }}>No laps yet — nobody has set a time here.</div>
-                )}
+                ) : null}
               </Link>
             );
           })}

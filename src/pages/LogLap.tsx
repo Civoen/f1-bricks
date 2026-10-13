@@ -335,7 +335,19 @@ function SavedModal({ result, onAnother, onClose, onUndo, playerById, summary }:
 }
 
 /** Tile label: the country, or the circuit's own name where a country hosts more than one round. */
+/** Tiles show the country, except where the circuit's own name is better known. */
+const TILE_NAMES: Record<string, string> = {
+  suzuka: 'Suzuka',
+  silverstone: 'Silverstone',
+  spa: 'Spa',
+  zandvoort: 'Zandvoort',
+  baku: 'Baku',
+  cota: 'Austin'
+};
+
 function tileLabel(s: CircuitSummary, all: CircuitSummary[]): string {
+  const named = TILE_NAMES[s.circuit.slug];
+  if (named) return named;
   const country = s.circuit.country;
   if (!country) return s.circuit.short_name;
   const shared = all.filter((x) => x.circuit.country === country).length > 1;
@@ -355,7 +367,7 @@ function TargetStrip({ summary, playerId }: { summary: CircuitSummary; playerId:
             <span className="mono">{formatLapTime(record.lap.lap_time_ms)}</span>
             <span className="holder-tag" style={{ background: record.player.colour_hex }}>{record.player.name}</span>
           </div>
-        ) : <div className="target-time muted">No time yet</div>}
+        ) : null}
       </div>
       {mine && (
         <div>

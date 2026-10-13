@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ProgressionChart } from '../components/ProgressionChart';
 import { EmptyState, ErrorState, LoadingState } from '../components/States';
@@ -5,6 +6,7 @@ import { TrackOutline } from '../components/TrackOutline';
 import { fmtDate, fmtDateTime } from '../lib/format';
 import { heroNameClass } from '../lib/format';
 import { formatLapTime, formatSeconds } from '../lib/laptime';
+import { markViewed } from '../lib/recentCircuit';
 import { achievementOrder, threatFor } from '../lib/records';
 import { ShareRecordButton } from '../components/ShareRecordButton';
 import type { RecordEvent } from '../lib/types';
@@ -13,6 +15,10 @@ import { useData } from '../state/data';
 export function CircuitDetail() {
   const { slug } = useParams();
   const { snapshot, loading, error, refresh, circuitBySlug, summaryById, players, playerById, annotations } = useData();
+  const known = Boolean(slug && circuitBySlug.has(slug));
+  useEffect(() => {
+    if (slug && known) markViewed(slug); // the home page features the circuit last viewed
+  }, [slug, known]);
 
   if (!snapshot && loading) return <LoadingState />;
   if (!snapshot) return <ErrorState message={error ?? 'Unknown error'} onRetry={() => void refresh()} />;
@@ -67,12 +73,11 @@ export function CircuitDetail() {
                     : ' · first record at this circuit'}
                 </div>
               </>
-            ) : (
-              <div className="muted" style={{ fontSize: 16, marginTop: 6 }}>No laps yet. Nobody has set a time here.</div>
-            )}
+            ) : null}
           </div>
         </div>
-        <TrackOutline slug={circuit.slug} colour={holder?.colour_hex ?? '#4A4A52'} detailed title={`${circuit.short_name} track layout`} />
+        <TrackOutline slug={circuit.slug} colour={holder?.colour_hex ?? '#4A4A52'} detailed title={`${circuit.short_name} track layout`}
+          lapMs={s.record?.lap_time_ms} />
       </section>
 
       <div className="two-col">
@@ -129,7 +134,7 @@ export function CircuitDetail() {
           <h2 id="recent-title">Recent laps</h2>
           <Link to={`/history?circuit=${circuit.slug}`} className="muted" style={{ fontSize: 13 }}>All {s.lapCount} laps →</Link>
         </div>
-        {recent.length === 0 ? <p className="muted">No laps logged here yet.</p> : (
+        {recent.length > 0 && (
           <div style={{ overflowX: 'auto' }}>
             <table className="table">
               <thead><tr><th scope="col">Set</th><th scope="col">Driver</th><th scope="col">Time</th><th scope="col">At the time</th></tr></thead>

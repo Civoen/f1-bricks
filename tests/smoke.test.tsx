@@ -55,20 +55,20 @@ describe('main flows', () => {
     expect(save.hasAttribute('disabled')).toBe(true);
     expect(screen.getByText(/Seconds must be between/)).toBeTruthy();
 
-    fireEvent.change(input, { target: { value: '129500' } });
-    expect(input.value).toBe('1:29.500');
-    expect(screen.getByText('NEW CIRCUIT RECORD')).toBeTruthy(); // nobody has a time at Miami in demo data
+    fireEvent.change(input, { target: { value: '125500' } });
+    expect(input.value).toBe('1:25.500');
+    expect(screen.getByText('NEW CIRCUIT RECORD')).toBeTruthy(); // well under every demo time at Miami
     expect(save.hasAttribute('disabled')).toBe(false);
 
     await act(async () => { fireEvent.click(save); });
     const dialog = await screen.findByRole('dialog', { name: 'Lap saved' }, { timeout: 3000 });
     expect(within(dialog).getByText('New circuit record')).toBeTruthy();
-    expect(within(dialog).getByText('1:29.500')).toBeTruthy();
+    expect(within(dialog).getByText('1:25.500')).toBeTruthy();
 
     // Undo removes it again and puts the time back in the field
     await act(async () => { fireEvent.click(within(dialog).getByRole('button', { name: /Undo/ })); });
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull(), { timeout: 3000 });
-    expect((screen.getByLabelText('Lap time') as HTMLInputElement).value).toBe('1:29.500');
+    expect((screen.getByLabelText('Lap time') as HTMLInputElement).value).toBe('1:25.500');
     expect(screen.getByText(/Undone/)).toBeTruthy();
   });
 

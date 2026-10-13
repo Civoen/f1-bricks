@@ -14,9 +14,9 @@ import {
 } from '../src/lib/records';
 import type { Circuit, Lap, Player } from '../src/lib/types';
 
-const RAG: Player = { id: 'p-rag', slug: 'rag', name: 'Rag', colour_hex: '#FF8A24', display_order: 1 };
+const RAG: Player = { id: 'p-rag', slug: 'rag', name: 'Rag', colour_hex: '#35C878', display_order: 1 };
 const ADAM: Player = { id: 'p-adam', slug: 'adam', name: 'Adam', colour_hex: '#398BFF', display_order: 2 };
-const BEN: Player = { id: 'p-ben', slug: 'ben', name: 'Ben', colour_hex: '#35C878', display_order: 3 };
+const BEN: Player = { id: 'p-ben', slug: 'ben', name: 'Ben', colour_hex: '#FF8A24', display_order: 3 };
 const PLAYERS = [RAG, ADAM, BEN];
 
 const circuit = (slug: string, order: number): Circuit => ({

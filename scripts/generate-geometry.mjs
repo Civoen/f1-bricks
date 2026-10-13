@@ -9,6 +9,7 @@
  * Each outline is projected to a flat SVG path that fits a 100-unit box, with:
  *   - pit:  the start/finish straight (drawn white in the UI)
  *   - sf:   a short tick across the finish line
+ *   - pace: real lap pace from scripts/lap-pace.json (for the lapping dot)
  *   - s1/s2: ticks at the real sector 1/2 and 2/3 timing lines
  *
  * Line positions come from scripts/sector-positions.json: fractions of distance
@@ -51,6 +52,7 @@ const SLUG_TO_GEO_ID = {
 
 const here0 = path.dirname(fileURLToPath(import.meta.url));
 const SECTOR_POSITIONS = JSON.parse(fs.readFileSync(path.join(here0, 'sector-positions.json'), 'utf8'));
+const LAP_PACE = JSON.parse(fs.readFileSync(path.join(here0, 'lap-pace.json'), 'utf8'));
 
 const TICK_HALF = 3;
 const PAD = 7;
@@ -70,6 +72,12 @@ const adiff = (x, y) => {
 };
 const f1 = (n) => (Math.round(n * 10) / 10).toString();
 const pt = (p) => `${f1(p[0])} ${f1(p[1])}`;
+
+function paceFor(slug) {
+  const p = LAP_PACE[slug]?.pace;
+  if (!p) throw new Error(`No lap pace for ${slug} in scripts/lap-pace.json`);
+  return p;
+}
 
 const out = {};
 for (const [slug, geoId] of Object.entries(SLUG_TO_GEO_ID)) {
@@ -139,7 +147,13 @@ for (const [slug, geoId] of Object.entries(SLUG_TO_GEO_ID)) {
     pit: 'M' + pitPts.map(pt).join(' L'),
     sf: tick(pos.sf),
     s1: tick(pos.s1),
-    s2: tick(pos.s2)
+    s2: tick(pos.s2),
+    // For the lap animation: where the lap starts along \`d\`, and whether the
+    // cars run against the outline's point order (sector 1 comes after sector 2
+    // when walking forward from the finish line).
+    start: Math.round(pos.sf * 10000) / 10000,
+    reverse: (((pos.s1 - pos.sf) % 1) + 1) % 1 > (((pos.s2 - pos.sf) % 1) + 1) % 1,
+    pace: paceFor(slug)
   };
 }
 
@@ -161,6 +175,15 @@ export interface TrackGeometry {
   s1: string;
   /** Sector 2 → 3 boundary tick */
   s2: string;
+  /** Finish line position as a fraction of the length of \`d\` */
+  start: number;
+  /** True when the racing direction runs against the order of points in \`d\` */
+  reverse: boolean;
+  /**
+   * How a real lap unfolds: distance covered (×10000) at 120 equal steps of
+   * lap time, from a 2025 pole lap's speed trace. Drives the lapping dot.
+   */
+  pace: number[];
 }
 
 export const TRACK_GEOMETRY: Record<string, TrackGeometry> = ${JSON.stringify(out, null, 2)};

@@ -32,7 +32,7 @@ the FIA or EA Sports.
 
 ## Sector line positions
 
-`scripts/sector-positions.json` was derived from public timing data served by OpenF1 (https://openf1.org), an unofficial project not associated with Formula 1. Only the derived line positions (three numbers per circuit) are included.
+`scripts/sector-positions.json` was derived from public timing data served by OpenF1 (https://openf1.org), an unofficial project not associated with Formula 1. Only the derived line positions (three numbers per circuit) are included. Likewise, `scripts/lap-pace.json` holds a derived pace curve per circuit (fraction of lap distance at 120 points in time), integrated from OpenF1 car speed data; no raw telemetry is included.
 
 ## Fonts
 

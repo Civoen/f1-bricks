@@ -6,6 +6,7 @@
 import { createRequire } from 'node:module';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { handleApi, type D1Like, type D1Stmt, type Env } from '../server/api';
+import { SCHEMA } from '../server/schema';
 
 const require = createRequire(import.meta.url);
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -298,7 +299,7 @@ describe('Discord record alerts (optional)', () => {
     expect(posts[1].url).toBe('https://discord.com/api/webhooks/test');
     expect(embed.title).toBe('🏁 New record · Suzuka');
     expect(embed.description).toBe('**Ben** sets **1:28.903**\nTakes it from **Adam** (1:29.117) by **0.214s**');
-    expect(embed.color).toBe(0x35c878);
+    expect(embed.color).toBe(0xff8a24);
     expect(embed.url).toBe('https://f1-bricks.pages.dev/circuits/suzuka');
     expect(embed.footer.text).toBe('Round 03 · Japan');
   });
@@ -315,5 +316,23 @@ describe('Discord record alerts (optional)', () => {
     expect(r.outcome).toBe('record');
     expect(f).toHaveBeenCalledTimes(1);
     expect(lapCount()).toBe(2);
+  });
+});
+
+describe('upgrading an existing database', () => {
+  it('a version 1 database keeps its laps and gets the new colours (Rag green, Ben orange)', async () => {
+    const old = new DatabaseSync(':memory:');
+    for (const q of SCHEMA) old.exec(q);
+    old.exec(`UPDATE players SET colour_hex = '#FF8A24' WHERE slug = 'rag'; UPDATE players SET colour_hex = '#35C878' WHERE slug = 'ben';
+              INSERT INTO meta (key, value) VALUES ('schema_version', '1');
+              INSERT INTO lap_entries (id, player_id, circuit_id, lap_time_ms, recorded_at)
+                SELECT 'lap-1', p.id, c.id, 89000, '2026-10-01T20:00:00.000Z' FROM players p, circuits c WHERE p.slug = 'rag' AND c.slug = 'suzuka';`);
+    env = { DB: fakeD1(old) };
+    const { body } = await api('GET', 'data');
+    const colours = Object.fromEntries(body.players.map((p: any) => [p.slug, p.colour_hex]));
+    expect(colours).toEqual({ rag: '#35C878', adam: '#398BFF', ben: '#FF8A24' });
+    expect(body.laps).toHaveLength(1);
+    expect((old.prepare(`SELECT value FROM meta WHERE key = 'schema_version'`).get() as any).value).toBe('2');
+    old.close();
   });
 });

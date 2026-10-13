@@ -102,9 +102,7 @@ export function History() {
       </div>
 
       {filtered.length === 0 ? (
-        snapshot.laps.length === 0
-          ? <EmptyState title="No laps yet">Every lap you log — fast or slow — appears here.</EmptyState>
-          : <EmptyState title="No laps match" action={false}>Try widening the filters.</EmptyState>
+        <EmptyState title="No laps match" action={false}>Try widening the filters.</EmptyState>
       ) : (
         <>
           <div className="table-scroll">

@@ -5,24 +5,40 @@ import { formatGap, formatLapTime, formatSeconds } from '../lib/laptime';
 import { fmtDay } from '../lib/format';
 import { heroNameClass } from '../lib/format';
 import { THREAT_MS, threatFor, type CircuitSummary } from '../lib/records';
+import { lastViewed } from '../lib/recentCircuit';
 import { useData } from '../state/data';
 
 export function Dashboard() {
-  const { snapshot, loading, error, refresh, summaries, standings, activeEvents, playerById } = useData();
+  const { snapshot, loading, error, refresh, summaries, summaryById, standings, activeEvents, playerById } = useData();
 
   if (!snapshot && loading) return <LoadingState />;
   if (!snapshot) return <ErrorState message={error ?? 'Unknown error'} onRetry={() => void refresh()} />;
 
-  // Featured circuit: where the most recent record was set (by achievement time).
+  // Featured circuit: whichever happened most recently — this device last
+  // viewed a circuit, or anyone logged, corrected or deleted a lap somewhere.
+  const viewed = lastViewed();
+  const viewedSummary = viewed ? summaries.find((s) => s.circuit.slug === viewed.slug) : undefined;
+  const latestChange = [...snapshot.audit].sort((a, b) => Date.parse(b.at) - Date.parse(a.at))
+    .find((a) => summaryById.has(a.after?.circuit_id ?? a.before?.circuit_id ?? ''));
+  const changedSummary = latestChange ? summaryById.get(latestChange.after?.circuit_id ?? latestChange.before?.circuit_id ?? '') : undefined;
   const latestEvent = [...activeEvents].sort((a, b) => Date.parse(b.achieved_at) - Date.parse(a.achieved_at))[0];
-  const featured: CircuitSummary | undefined =
-    summaries.find((s) => s.circuit.id === latestEvent?.circuit_id) ?? summaries[0];
-  const withRecord = summaries.filter((s) => s.record).length;
+  let featured: CircuitSummary | undefined;
+  let reason: string | null = null;
+  if (viewedSummary && (!changedSummary || Date.parse(viewed!.at) >= Date.parse(latestChange!.at))) {
+    featured = viewedSummary;
+    reason = 'Last viewed';
+  } else if (changedSummary) {
+    featured = changedSummary;
+    reason = 'Last updated';
+  } else {
+    featured = summaries.find((s) => s.circuit.id === latestEvent?.circuit_id) ?? summaries[0];
+    reason = latestEvent ? 'Last record broken' : null;
+  }
   const threatCount = summaries.filter((s) => threatFor(s)).length;
 
   return (
     <div className="dash">
-      {featured && <Hero key={featured.circuit.id} summary={featured} isLatest={Boolean(latestEvent)} />}
+      {featured && <Hero key={featured.circuit.id} summary={featured} reason={reason} />}
 
       <section className="tower" aria-labelledby="tower-title">
         <div className="tower-head">
@@ -35,7 +51,6 @@ export function Dashboard() {
                   <span style={{ color: s.player.colour_hex, fontWeight: 700 }}>{s.player.name} {s.records}</span>
                 </span>
               ))}
-              {' · '}{withRecord} of {summaries.length} set
               {threatCount > 0 && <>{' · '}<span className="threat-text" title={`Records with a rival within ${THREAT_MS / 1000}s`}>{threatCount} under threat</span></>}
             </div>
           </div>
@@ -52,7 +67,7 @@ export function Dashboard() {
                 <Link
                   to={`/circuits/${s.circuit.slug}`}
                   className={`tower-row${s.circuit.id === featured?.circuit.id ? ' current' : ''}${s.record ? '' : ' empty'}`}
-                  aria-label={`Round ${i + 1}, ${s.circuit.short_name}: ${s.record && holder ? `record ${formatLapTime(s.record.lap_time_ms)} by ${holder.name}` : 'no laps yet'}${threat ? `, under threat from ${threat.challenger.player.name}` : ''}`}
+                  aria-label={`Round ${i + 1}, ${s.circuit.short_name}: ${s.record && holder ? `record ${formatLapTime(s.record.lap_time_ms)} by ${holder.name}` : ''}${threat ? `, under threat from ${threat.challenger.player.name}` : ''}`}
                 >
                   <span className="rnd" style={holder ? { background: holder.colour_hex, borderColor: holder.colour_hex, color: '#0A0A0C' } : undefined}>
                     {String(i + 1).padStart(2, '0')}
@@ -66,7 +81,6 @@ export function Dashboard() {
                     {s.record ? formatLapTime(s.record.lap_time_ms) : '—'}
                   </span>
                   <span className="chips">
-                    {!s.record && <span className="chip"><span className="dot" style={{ background: 'var(--border)' }} />No laps yet</span>}
                     {s.record && s.standings.map((st) => (
                       <span key={st.player.id} className={`chip${threat && threat.challenger.player.id === st.player.id ? ' chip-threat' : ''}`}
                         title={threat && threat.challenger.player.id === st.player.id ? `Under threat: ${st.player.name} is ${(threat.gapMs / 1000).toFixed(3)}s away` : undefined}
@@ -86,7 +100,7 @@ export function Dashboard() {
   );
 }
 
-function Hero({ summary, isLatest }: { summary: CircuitSummary; isLatest: boolean }) {
+function Hero({ summary, reason }: { summary: CircuitSummary; reason: string | null }) {
   const { playerById } = useData();
   const s = summary;
   const round = s.circuit.display_order;
@@ -98,13 +112,14 @@ function Hero({ summary, isLatest }: { summary: CircuitSummary; isLatest: boolea
   return (
     <section className="dash-hero enter" aria-label={`Featured circuit: ${name}`}>
       <div className="eyebrow-red">
-        Round {String(round).padStart(2, '0')} · {s.circuit.country}{isLatest && ' · Last record broken'}
+        Round {String(round).padStart(2, '0')} · {s.circuit.country}{reason && ` · ${reason}`}
       </div>
       <h1 className={heroNameClass(name)}>
         <Link to={`/circuits/${s.circuit.slug}`} style={{ textDecoration: 'none' }}>{name}</Link>
       </h1>
 
-      <TrackOutline slug={s.circuit.slug} colour={holder?.colour_hex ?? '#4A4A52'} detailed animate className="hero-track" />
+      <TrackOutline slug={s.circuit.slug} colour={holder?.colour_hex ?? '#4A4A52'} detailed animate className="hero-track"
+        lapMs={s.record?.lap_time_ms} />
 
       <div>
         <div className="eyebrow">Circuit record</div>
@@ -120,12 +135,7 @@ function Hero({ summary, isLatest }: { summary: CircuitSummary; isLatest: boolea
               </span>
             </div>
           </div>
-        ) : (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap', marginTop: 4 }}>
-            <div className="hero-record-time muted">—:——.———</div>
-            <span className="muted">No laps yet. Be the first on the board.</span>
-          </div>
-        )}
+        ) : null}
         <div className="pb-tiles">
           {s.standings.map((st) => (
             <div key={st.player.id} className="pb-tile rise" style={{ animationDelay: `${350 + s.standings.indexOf(st) * 60}ms`, borderTopColor: st.lap ? st.player.colour_hex : 'var(--border)' }}>

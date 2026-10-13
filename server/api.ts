@@ -20,7 +20,7 @@
 import { formatLapTime, formatSeconds } from '../src/lib/laptime';
 import { deriveRecordHistory, fastestLap } from '../src/lib/records';
 import type { AuditEntry, AuditSnapshot, Circuit, Lap, LapOutcome, LogLapResult, Player, RecordEvent } from '../src/lib/types';
-import { SCHEMA, SCHEMA_VERSION } from './schema';
+import { MIGRATIONS, SCHEMA, SCHEMA_VERSION } from './schema';
 
 // ---------------------------------------------------------------------------
 // The slice of Cloudflare's D1 API this file uses (kept local so the project
@@ -65,13 +65,22 @@ function ensureSchema(db: D1Like): Promise<void> {
   let p = schemaReady.get(db);
   if (!p) {
     p = (async () => {
+      let current = 0;
       try {
         const r = await db.prepare(`SELECT value FROM meta WHERE key = 'schema_version'`).first<{ value: string }>();
-        if (r?.value === SCHEMA_VERSION) return;
+        current = Number(r?.value ?? 0) || 0;
       } catch {
         // No meta table yet: a brand-new database.
       }
-      for (const sql of SCHEMA) await db.prepare(sql).run();
+      if (current >= SCHEMA_VERSION) return;
+      if (current === 0) {
+        for (const sql of SCHEMA) await db.prepare(sql).run();
+      } else {
+        for (let v = current + 1; v <= SCHEMA_VERSION; v++) {
+          for (const sql of MIGRATIONS[v] ?? []) await db.prepare(sql).run();
+        }
+      }
+      await db.prepare(`INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', ?)`).bind(String(SCHEMA_VERSION)).run();
     })();
     p.catch(() => schemaReady.delete(db));
     schemaReady.set(db, p);

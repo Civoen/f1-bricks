@@ -15,7 +15,7 @@ export function ProgressionChart({ laps, players }: { laps: Lap[]; players: Play
   const [hover, setHover] = useState<{ x: number; y: number; player: Player; lap: Lap } | null>(null);
   const series = players.map((p) => ({ player: p, points: pbProgression(laps, p.id) }));
   const all = series.flatMap((s) => s.points);
-  if (all.length === 0) return <p className="muted">No laps yet, so there’s no progression to show.</p>;
+  if (all.length === 0) return null;
 
   const t0 = Math.min(...all.map((l) => Date.parse(l.recorded_at)));
   const t1 = Math.max(Date.now(), ...all.map((l) => Date.parse(l.recorded_at)));

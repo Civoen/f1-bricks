@@ -8,9 +8,9 @@ import { deriveRecordHistory, fastestLap } from '../lib/records';
 import type { AuditEntry, AuditSnapshot, Circuit, Lap, LogLapResult, Player, RecordEvent } from '../lib/types';
 
 const PLAYERS: Player[] = [
-  { id: 'demo-rag', slug: 'rag', name: 'Rag', colour_hex: '#FF8A24', display_order: 1 },
+  { id: 'demo-rag', slug: 'rag', name: 'Rag', colour_hex: '#35C878', display_order: 1 },
   { id: 'demo-adam', slug: 'adam', name: 'Adam', colour_hex: '#398BFF', display_order: 2 },
-  { id: 'demo-ben', slug: 'ben', name: 'Ben', colour_hex: '#35C878', display_order: 3 }
+  { id: 'demo-ben', slug: 'ben', name: 'Ben', colour_hex: '#FF8A24', display_order: 3 }
 ];
 
 // Mirrors the reference data in server/schema.ts for demo purposes.
@@ -20,11 +20,11 @@ const CIRCUIT_ROWS: [string, string, string, string, string, number | null][] = 
   ['suzuka', 'Suzuka International Racing Course', 'Suzuka', 'JPN', 'Japan', 88900],
   ['bahrain', 'Bahrain International Circuit', 'Bahrain', 'BHR', 'Bahrain', 89600],
   ['jeddah', 'Jeddah Corniche Circuit', 'Jeddah', 'KSA', 'Saudi Arabia', 88400],
-  ['miami', 'Miami International Autodrome', 'Miami', 'MIA', 'United States', null],
+  ['miami', 'Miami International Autodrome', 'Miami', 'MIA', 'United States', 87600],
   ['imola', 'Autodromo Enzo e Dino Ferrari', 'Imola', 'IMO', 'Italy', 75000],
   ['monaco', 'Circuit de Monaco', 'Monaco', 'MON', 'Monaco', 71200],
   ['barcelona', 'Circuit de Barcelona-Catalunya', 'Barcelona', 'ESP', 'Spain', 72800],
-  ['montreal', 'Circuit Gilles Villeneuve', 'Montréal', 'CAN', 'Canada', null],
+  ['montreal', 'Circuit Gilles Villeneuve', 'Montréal', 'CAN', 'Canada', 72100],
   ['red-bull-ring', 'Red Bull Ring', 'Red Bull Ring', 'AUT', 'Austria', 64600],
   ['silverstone', 'Silverstone Circuit', 'Silverstone', 'GBR', 'Great Britain', 86800],
   ['spa', 'Circuit de Spa-Francorchamps', 'Spa', 'BEL', 'Belgium', 103500],
@@ -33,11 +33,11 @@ const CIRCUIT_ROWS: [string, string, string, string, string, number | null][] = 
   ['monza', 'Autodromo Nazionale Monza', 'Monza', 'ITA', 'Italy', 80400],
   ['baku', 'Baku City Circuit', 'Baku', 'AZE', 'Azerbaijan', 102700],
   ['marina-bay', 'Marina Bay Street Circuit', 'Marina Bay', 'SGP', 'Singapore', 95100],
-  ['cota', 'Circuit of the Americas', 'COTA', 'USA', 'United States', null],
-  ['mexico-city', 'Autódromo Hermanos Rodríguez', 'Mexico City', 'MEX', 'Mexico', null],
+  ['cota', 'Circuit of the Americas', 'COTA', 'USA', 'United States', 93200],
+  ['mexico-city', 'Autódromo Hermanos Rodríguez', 'Mexico City', 'MEX', 'Mexico', 76000],
   ['interlagos', 'Autódromo José Carlos Pace', 'Interlagos', 'BRA', 'Brazil', 70400],
-  ['las-vegas', 'Las Vegas Strip Circuit', 'Las Vegas', 'LVG', 'United States', null],
-  ['lusail', 'Lusail International Circuit', 'Lusail', 'QAT', 'Qatar', null],
+  ['las-vegas', 'Las Vegas Strip Circuit', 'Las Vegas', 'LVG', 'United States', 92800],
+  ['lusail', 'Lusail International Circuit', 'Lusail', 'QAT', 'Qatar', 80500],
   ['yas-marina', 'Yas Marina Circuit', 'Yas Marina', 'ABU', 'Abu Dhabi', 83500]
 ];
 
@@ -56,7 +56,7 @@ function seeded(seed: number) {
 function buildLaps(): Lap[] {
   const rnd = seeded(25);
   const laps: Lap[] = [];
-  const start = Date.parse('2026-09-01T19:00:00Z');
+  const start = Date.parse('2026-08-01T19:00:00Z');
   let n = 0;
   CIRCUIT_ROWS.forEach(([slug, , , , , base], ci) => {
     if (base === null) return;

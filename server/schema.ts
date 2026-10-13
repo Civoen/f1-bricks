@@ -9,7 +9,8 @@
  * correctly as text. Lap times are integer milliseconds.
  */
 
-export const SCHEMA_VERSION = '1';
+/** Bump this and add an entry to MIGRATIONS to change an existing database. */
+export const SCHEMA_VERSION = 2;
 
 const NOW = "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))";
 const UUID = '(lower(hex(randomblob(16))))';
@@ -102,9 +103,9 @@ export const SCHEMA: string[] = [
 
   // Reference data: the three drivers and the F1 25 circuits (no lap times).
   `INSERT OR IGNORE INTO players (slug, name, colour_hex, display_order) VALUES
-    ('rag',  'Rag',  '#FF8A24', 1),
+    ('rag',  'Rag',  '#35C878', 1),
     ('adam', 'Adam', '#398BFF', 2),
-    ('ben',  'Ben',  '#35C878', 3)`,
+    ('ben',  'Ben',  '#FF8A24', 3)`,
 
   `INSERT OR IGNORE INTO circuits (slug, name, short_name, code, country, display_order) VALUES
     ('albert-park',   'Albert Park Circuit',                'Albert Park',   'AUS', 'Australia',     1),
@@ -130,7 +131,18 @@ export const SCHEMA: string[] = [
     ('interlagos',    'Autódromo José Carlos Pace',         'Interlagos',    'BRA', 'Brazil',        21),
     ('las-vegas',     'Las Vegas Strip Circuit',            'Las Vegas',     'LVG', 'United States', 22),
     ('lusail',        'Lusail International Circuit',      'Lusail',        'QAT', 'Qatar',         23),
-    ('yas-marina',    'Yas Marina Circuit',                 'Yas Marina',    'ABU', 'Abu Dhabi',     24)`,
-
-  `INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '${SCHEMA_VERSION}')`
+    ('yas-marina',    'Yas Marina Circuit',                 'Yas Marina',    'ABU', 'Abu Dhabi',     24)`
 ];
+
+/**
+ * Changes for databases created by an earlier version. A new database gets
+ * SCHEMA (already up to date); an existing one runs each step above its
+ * stored version, once, on the first request after a deploy.
+ */
+export const MIGRATIONS: Record<number, string[]> = {
+  // v2: Rag is green, Ben is orange.
+  2: [
+    `UPDATE players SET colour_hex = '#35C878' WHERE slug = 'rag'`,
+    `UPDATE players SET colour_hex = '#FF8A24' WHERE slug = 'ben'`
+  ]
+};

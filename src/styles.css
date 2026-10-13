@@ -11,9 +11,9 @@
   --border: #333338;
   --red: #e10600;
   --red-text: #ff6b63; /* red used for text on dark: meets 4.5:1 */
-  --rag: #ff8a24;
+  --rag: #35c878;
   --adam: #398bff;
-  --ben: #35c878;
+  --ben: #ff8a24;
   --empty: #4a4a52;
 
   --font-display: 'Big Shoulders Display', 'Arial Narrow', sans-serif;
@@ -76,7 +76,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px
 .rail-link.is-log.active .log-mark svg, .rail-link.is-log .log-mark svg { color: #fff; }
 .rail-spacer { margin-top: auto; }
 .main { flex: 1; min-width: 0; display: flex; flex-direction: column; overflow-y: auto; }
-.page { padding: 32px 40px 48px; max-width: 1480px; width: 100%; }
+.page { padding: 32px 40px 48px; width: 100%; }
 .page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
 .page-title { margin: 0; font-family: var(--font-display); font-weight: 900; font-size: 52px; line-height: 0.9; letter-spacing: 0.01em; text-transform: uppercase; }
 
@@ -339,6 +339,7 @@ input[type='datetime-local'], input[type='date'] { color-scheme: dark; }
 .circuit-card { animation: rise .45s cubic-bezier(.2, .7, .2, 1) backwards; animation-delay: calc(min(var(--i, 0), 12) * 30ms); }
 .track-draw { stroke-dasharray: 1; stroke-dashoffset: 0; animation: draw 1.4s cubic-bezier(.55, .1, .25, 1) both; }
 .track-details { animation: fade-in .4s ease-out 1.15s both; }
+.lap-car { opacity: 0; transition: opacity .4s ease-out; }
 .overlay { animation: fade-in .2s ease-out both; }
 .modal { animation: modal-in .3s cubic-bezier(.2, .8, .2, 1) both; }
 .standing, .kpi, .card { animation: rise .45s cubic-bezier(.2, .7, .2, 1) both; }

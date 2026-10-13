@@ -24,7 +24,6 @@ export function Stats() {
   const laps = snapshot.laps;
   const allThree = summaries.filter((s) => s.allThreeSet);
   const missing = summaries.filter((s) => !s.allThreeSet);
-  const untouched = summaries.filter((s) => s.lapCount === 0).length;
   const closest = [...allThree].sort((a, b) => (a.spreadMs ?? 0) - (b.spreadMs ?? 0))[0];
   const widest = [...allThree].sort((a, b) => (b.spreadMs ?? 0) - (a.spreadMs ?? 0))[0];
   const lastImprovement = [...laps].filter((l) => annotations.get(l.id)?.pbAtTime).sort((a, b) => achievementOrder(b, a))[0];
@@ -70,11 +69,11 @@ export function Stats() {
 
       <section className="kpis" aria-label="Key figures">
         <Kpi label="All three times set" value={`${allThree.length} / ${summaries.length}`} sub="circuits with a PB from every driver" />
-        <Kpi label="Missing entries" value={String(missing.length)} sub={`${untouched} with no laps at all`} />
+        <Kpi label="Missing entries" value={String(missing.length)} sub="circuits still missing a driver’s time" />
         <Kpi label="Lap entries" value={String(laps.length)} sub="every attempt, fast or slow" />
         <Kpi label="Most recently improved"
           value={lastImprovement ? circuitById.get(lastImprovement.circuit_id)?.short_name ?? '—' : '—'}
-          sub={lastImprovement ? `${playerById.get(lastImprovement.player_id)?.name} · ${formatLapTime(lastImprovement.lap_time_ms)} · ${fmtDay(lastImprovement.recorded_at)}` : 'No laps yet'} />
+          sub={lastImprovement ? `${playerById.get(lastImprovement.player_id)?.name} · ${formatLapTime(lastImprovement.lap_time_ms)} · ${fmtDay(lastImprovement.recorded_at)}` : ''} />
         <Kpi label="Closest three-way fight"
           value={closest ? closest.circuit.short_name : '—'}
           sub={closest ? `P1 to P3 covered by ${formatSeconds(closest.spreadMs ?? 0)}s` : 'Needs a circuit with all three times'} />
