@@ -110,6 +110,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px
   height: 34px; padding: 0 14px; border-radius: 17px; border: 1px solid var(--border); background: transparent;
   font-weight: 600; font-size: 13px; white-space: nowrap;
 }
+a.pill { display: inline-flex; align-items: center; }
 .pill[aria-pressed='true'] { background: var(--text); color: var(--bg); border-color: var(--text); font-weight: 700; }
 
 .field { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
@@ -149,7 +150,7 @@ input[type='datetime-local'], input[type='date'] { color-scheme: dark; }
 
 /* ---------- Dashboard (design M) ---------- */
 .dash { display: flex; flex: 1 0 auto; min-height: 640px; }
-.dash-hero { container-type: inline-size; width: clamp(440px, 40vw, 620px); flex-shrink: 0; padding: 32px 36px; display: flex; flex-direction: column; min-height: 0; }
+.dash-hero { container-type: inline-size; width: clamp(440px, 44vw, 760px); flex-shrink: 0; padding: 32px 36px; display: flex; flex-direction: column; min-height: 0; }
 .hero-name { margin: 4px 0 0; font-family: var(--font-display); font-weight: 900; font-size: 108px; line-height: 0.85; text-transform: uppercase; overflow-wrap: normal; hyphens: none; text-wrap: balance; }
 .hero-name.long { font-size: 84px; }
 .hero-name.xlong { font-size: 64px; }
@@ -158,7 +159,7 @@ input[type='datetime-local'], input[type='date'] { color-scheme: dark; }
 .dash-hero .hero-name.long { font-size: min(84px, 14cqi); }
 .dash-hero .hero-name.xlong { font-size: min(64px, 10.5cqi); }
 .dash-hero .hero-record-time { font-size: min(92px, 17cqi); }
-.hero-track { margin: auto 0; display: block; width: 100%; max-height: 340px; flex: 1 1 auto; min-height: 90px; }
+.hero-track { margin: 12px 0; display: block; width: 100%; flex: 1 1 0; min-height: 160px; }
 .hero-record-time { font-family: var(--font-display); font-weight: 800; font-size: 92px; line-height: 0.95; font-variant-numeric: tabular-nums; }
 .hero-holder { font-family: var(--font-display); font-weight: 900; font-size: 32px; line-height: 1; text-transform: uppercase; }
 .pb-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 16px; }
@@ -173,11 +174,24 @@ input[type='datetime-local'], input[type='date'] { color-scheme: dark; }
 .tower-list { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 3px; margin: 0; padding: 0; list-style: none; }
 .tower-list > li { flex: 1 1 0; min-height: 22px; max-height: 44px; display: flex; }
 .tower-row {
-  flex: 1; text-decoration: none; display: grid; grid-template-columns: 30px 40px minmax(0, 1fr) 84px auto;
+  flex: 1; text-decoration: none; display: grid; grid-template-columns: 30px 40px minmax(0, 1fr) 96px auto;
   gap: 10px; align-items: center; padding: 0 12px 0 8px; background: var(--card); border-radius: 4px;
   font-variant-numeric: tabular-nums; transition: background .18s ease, transform .18s ease;
 }
 .tower-row:hover { background: var(--elevated); transform: translateX(3px); }
+.tower-row { position: relative; }
+/* The whole row opens the circuit; the time on top of it opens Log a lap there. */
+.tower-row .row-link { position: absolute; inset: 0; border-radius: inherit; z-index: 0; }
+.tower-row .row-link:focus-visible { outline: 2px solid var(--text); outline-offset: -2px; }
+.tower-row > :not(.row-link) { position: relative; pointer-events: none; }
+.tower-row > .rec-link { pointer-events: auto; z-index: 1; }
+.rec-link {
+  display: inline-flex; align-items: center; justify-content: space-between; gap: 6px; margin: 0 -6px; padding: 3px 6px;
+  border-radius: 4px; text-decoration: none; color: inherit; transition: background .15s, color .15s;
+}
+.rec-link .rec-plus { font-family: var(--font-body); font-weight: 800; font-size: 13px; line-height: 1; opacity: 0; transition: opacity .15s; }
+.rec-link:hover, .rec-link:focus-visible { background: var(--red); color: #fff; }
+.rec-link:hover .rec-plus, .rec-link:focus-visible .rec-plus { opacity: 1; }
 .tower-row.current { background: var(--elevated); }
 .tower-row.empty { background: var(--sunken); }
 
@@ -199,7 +213,7 @@ input[type='datetime-local'], input[type='date'] { color-scheme: dark; }
 
 /* ---------- Log a lap ---------- */
 .log-page { display: flex; flex: 1 0 auto; }
-.log-form { width: 660px; flex-shrink: 0; padding: 24px 40px; display: flex; flex-direction: column; gap: 16px; }
+.log-form { width: 620px; flex-shrink: 0; padding: 24px 40px; display: flex; flex-direction: column; gap: 16px; }
 .log-preview { flex: 1; min-width: 0; background: var(--card); border-left: 1px solid var(--border); padding: 32px 40px; display: flex; flex-direction: column; }
 .drivers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
 .driver-btn {
@@ -385,7 +399,7 @@ input[type='datetime-local'], input[type='date'] { color-scheme: dark; }
   .tower-list > li { flex: none; height: 40px; max-height: none; }
   .log-form { width: auto; }
   .log-preview { border-left: 0; border-top: 1px solid var(--border); }
-  .hero-track { max-height: 300px; margin: 24px 0; }
+  .hero-track { flex: none; height: auto; min-height: 0; max-height: 460px; margin: 24px 0; }
   .detail-hero, .two-col { grid-template-columns: minmax(0, 1fr); }
 }
 
@@ -447,5 +461,14 @@ input[type='datetime-local'], input[type='date'] { color-scheme: dark; }
 }
 .threat-list a:hover { background: var(--elevated); }
 .threat-list svg { width: 40px; height: 28px; }
+.threat-name { display: block; font-family: var(--font-display); font-weight: 800; font-size: 20px; text-transform: uppercase; line-height: 1.1; }
+.driver-table td { vertical-align: middle; }
+.driver-circuit { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; font-family: var(--font-display); font-weight: 800; font-size: 18px; text-transform: uppercase; }
+.driver-circuit svg { width: 36px; height: 24px; flex-shrink: 0; }
+.driver-circuit:hover { color: var(--red-text); }
 .threat-gap { font-family: var(--font-mono); font-weight: 700; font-size: 18px; color: #ffb3ae; text-align: right; }
 @media (prefers-reduced-motion: reduce) { .chip.chip-threat { animation: none; } }
+
+/* Record card preview (where the share sheet isn't available) */
+.share-preview { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+.share-preview img { width: 100%; height: auto; border-radius: var(--radius); display: block; -webkit-touch-callout: default; user-select: auto; }

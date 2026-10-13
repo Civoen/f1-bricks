@@ -12,11 +12,12 @@ A web app and installable PWA for Rag, Adam and Ben (The Bricks) to log F1 25 ti
 
 | Page | What it does |
 |---|---|
-| **Home** | Featured circuit (whichever was most recently viewed on this device or had a lap logged, corrected or deleted by anyone), real track outline with real sector lines (a white dot laps it at real F1 pace, scaled to exactly the record time), record and PBs. The timing tower lists all 24 rounds in 2025 calendar order on one screen; rivals within 0.100s of a record are highlighted as **under threat**. |
+| **Home** | Featured circuit (whichever was most recently viewed on this device or had a lap logged, corrected or deleted by anyone), real track outline with real sector lines (a white dot laps it at real F1 pace, scaled to exactly the record time), record and PBs. Tap a time in the timing tower to log a lap at that track. The timing tower lists all 24 rounds in 2025 calendar order on one screen; rivals within 0.100s of a record are highlighted as **under threat**. |
 | **Log** | Pick driver and circuit, then just type the digits (`128750` → `1:28.750`). Shows the record and the driver's PB to beat, previews whether the lap is a record/PB/tie, confirms after saving, and offers **Undo** and a **record card**. |
 | **Tracks** | Every circuit with search, filters (record holder, missing times, no laps) and sorting (calendar, A–Z, closest fight, most recently broken). |
 | **Circuit page** | Record, PB leaderboard with millisecond gaps, a record timeline (including corrected history), a PB progression chart, recent laps, and a **Share record card** button. |
 | **Laps** | Full lap history with filters, pagination, and correcting or deleting a lap. |
+| **Driver page** | Tap any driver's name. Records held, average gap, strongest and weakest tracks, nemesis, form, records within reach, records to defend, every PB with position and gap, and recent laps. |
 | **Stats** | Standings, key figures, **under threat** list, head-to-head for each pair, recent records and an activity feed. |
 
 Times are stored as **integer milliseconds** (`1:10.482` → `70482`), so comparisons and gaps are exact.
@@ -89,7 +90,7 @@ Delete the secret (and redeploy) to stop alerts. Alerts go out for new records o
 
 ## Record cards
 
-On a circuit page (or straight after setting a record) **Share record card** builds a 1080×1080 image in the browser: circuit, outline, time, holder, margin and the three PBs. On phones it opens the share sheet (WhatsApp, Discord, Messages…); on desktop it downloads a PNG.
+On a circuit page (or straight after setting a record) **Share record card** builds a 1080×1080 image in the browser: circuit, outline, time, holder, margin and the three PBs. The card is drawn as soon as the button appears, so on phones a tap opens the share sheet straight away (WhatsApp, Discord, Messages…). Where sharing images isn't possible (most desktops, some in-app browsers) the card opens in a preview with a download button; on a phone you can also press and hold it to save.
 
 ## Under threat
 

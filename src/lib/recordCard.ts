@@ -149,25 +149,32 @@ export async function renderRecordCard(d: RecordCardData): Promise<Blob> {
   );
 }
 
-/** Opens the share sheet with the image, or downloads it where sharing files isn't supported. */
-export async function shareRecordCard(blob: Blob, filename: string, text: string): Promise<'shared' | 'downloaded' | 'cancelled'> {
-  const file = new File([blob], filename, { type: 'image/png' });
+/** The card as a file, ready for the share sheet. */
+export function recordCardFile(blob: Blob, filename: string): File {
+  return new File([blob], filename, { type: 'image/png' });
+}
+
+/** True when this browser can put an image file in the share sheet. */
+export function canShareFile(file: File): boolean {
   const nav = navigator as Navigator & { canShare?: (d: ShareData) => boolean };
-  if (nav.share && nav.canShare?.({ files: [file] })) {
-    try {
-      await nav.share({ files: [file], text });
-      return 'shared';
-    } catch (e) {
-      if ((e as Error).name === 'AbortError') return 'cancelled';
-    }
+  try {
+    return typeof nav.share === 'function' && Boolean(nav.canShare?.({ files: [file] }));
+  } catch {
+    return false;
   }
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 4000);
-  return 'downloaded';
+}
+
+/**
+ * Opens the share sheet. Call this straight from the tap/click handler with a
+ * file made beforehand: browsers (Safari especially) refuse to share if the
+ * page did other async work first, because the tap no longer "counts".
+ * Only the image is shared — adding text makes some apps drop the picture.
+ */
+export async function shareFile(file: File): Promise<'shared' | 'cancelled' | 'failed'> {
+  try {
+    await navigator.share({ files: [file] });
+    return 'shared';
+  } catch (e) {
+    return (e as Error)?.name === 'AbortError' ? 'cancelled' : 'failed';
+  }
 }

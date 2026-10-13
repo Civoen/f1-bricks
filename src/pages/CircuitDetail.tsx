@@ -89,7 +89,7 @@ export function CircuitDetail() {
               {s.standings.map((st) => (
                 <tr key={st.player.id}>
                   <td className="mono muted">{st.lap ? `P${st.position}` : '—'}</td>
-                  <td><span className="player-name" style={{ color: st.player.colour_hex }}>{st.player.name}</span></td>
+                  <td><Link to={`/drivers/${st.player.slug}`} className="player-name" style={{ color: st.player.colour_hex, textDecoration: 'none' }}>{st.player.name}</Link></td>
                   <td className="t" style={{ color: st.lap ? undefined : 'var(--muted)', fontWeight: st.lap ? 700 : 400 }}>{st.lap ? formatLapTime(st.lap.lap_time_ms) : 'No time set'}</td>
                   <td className="mono">
                     {!st.lap ? '' : st.position === 1 ? 'Leader'

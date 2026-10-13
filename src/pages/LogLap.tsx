@@ -54,6 +54,21 @@ export function LogLap() {
     }
   }, [snapshot]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Follow ?circuit= / ?driver= when they change while this page is already open
+  // (e.g. tapping a time in the timing tower, or "Log a lap here" on a circuit page).
+  const circuitParam = params.get('circuit');
+  const driverParam = params.get('driver');
+  useEffect(() => {
+    if (!snapshot || !circuitParam) return;
+    const s = summaries.find((x) => x.circuit.slug === circuitParam);
+    if (s) setCircuitId(s.circuit.id);
+  }, [circuitParam, Boolean(snapshot)]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (!snapshot || !driverParam) return;
+    const p = players.find((x) => x.slug === driverParam);
+    if (p) setPlayerId(p.id);
+  }, [driverParam, Boolean(snapshot)]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const complete = isCompleteLapTimeInput(timeText);
   const parsed: ParseResult = complete ? parseLapTime(timeText) : { ok: false, error: 'Type all six digits, e.g. 128750 for 1:28.750' };
   const recordedAtIso = fromLocalInput(when);

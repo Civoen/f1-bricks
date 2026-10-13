@@ -1,4 +1,5 @@
 import { useEffect, useRef, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 
 interface Props {
   label: string;
@@ -38,11 +39,14 @@ export function Modal({ label, accent, onClose, children }: Props) {
     };
   }, [onClose]);
 
-  return (
+  // Rendered at the end of <body> so a dialog opened from inside another
+  // (animated) dialog still covers the whole screen.
+  return createPortal(
     <div className="overlay" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div ref={ref} className="modal" role="dialog" aria-modal="true" aria-label={label} style={accent ? { borderTopColor: accent } : undefined}>
         {children}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

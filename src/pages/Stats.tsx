@@ -56,7 +56,7 @@ export function Stats() {
               <span className="display" style={{ fontWeight: 900, fontSize: 30, color: 'var(--muted)' }}>P{s.position}</span>
               {s.position === 1 && s.records > 0 && <span className="tag tag-pb">{tiedLead ? 'Joint leader' : 'Leader'}</span>}
             </div>
-            <div className="display" style={{ fontWeight: 900, fontSize: 34, color: s.player.colour_hex, textTransform: 'uppercase' }}>{s.player.name}</div>
+            <Link to={`/drivers/${s.player.slug}`} className="display" style={{ fontWeight: 900, fontSize: 34, color: s.player.colour_hex, textTransform: 'uppercase', textDecoration: 'none' }}>{s.player.name} <span aria-hidden="true" style={{ fontSize: 22, color: 'var(--muted)' }}>→</span></Link>
             <div className="big num">{s.records}</div>
             <div className="muted" style={{ fontSize: 13, marginTop: 6 }}>records · {pct(s.share)} of circuits with a record</div>
             <div className="muted" style={{ fontSize: 13 }}>{s.secondPlaces} second places · {s.pbImprovements} PB improvement{s.pbImprovements === 1 ? '' : 's'} {period === 'all' ? 'all time' : `in ${period} days`}</div>

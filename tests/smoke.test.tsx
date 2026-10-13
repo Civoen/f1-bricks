@@ -25,9 +25,14 @@ describe('pages render with demo data', () => {
     await renderAt('/');
     expect(screen.getByText('TIMING TOWER')).toBeTruthy();
     const tower = screen.getByRole('list');
-    expect(within(tower).getAllByRole('link')).toHaveLength(24);
-    expect(within(tower).getAllByRole('link')[0]!.getAttribute('aria-label')).toMatch(/^Round 1, Albert Park/);
-    expect(within(tower).getAllByRole('link')[23]!.getAttribute('aria-label')).toMatch(/^Round 24, Yas Marina/);
+    const rows = within(tower).getAllByRole('link', { name: /^Round \d+,/ });
+    expect(rows).toHaveLength(24);
+    expect(rows[0]!.getAttribute('aria-label')).toMatch(/^Round 1, Albert Park/);
+    expect(rows[23]!.getAttribute('aria-label')).toMatch(/^Round 24, Yas Marina/);
+    // Each time opens Log a lap at that circuit
+    const times = within(tower).getAllByRole('link', { name: /^Log a lap at / });
+    expect(times).toHaveLength(24);
+    expect(times[2]!.getAttribute('href')).toBe('/log?circuit=suzuka');
     expect(screen.getAllByText(/DEMO DATA/).length).toBeGreaterThan(0);
     // Sidebar has Log under Home
     const rail = screen.getAllByRole('navigation', { name: 'Primary' })[0]!;
@@ -35,7 +40,7 @@ describe('pages render with demo data', () => {
     expect(labels.slice(1, 3)).toEqual(['Dashboard', 'Log a lap']);
   });
 
-  it.each(['/circuits', '/circuits/suzuka', '/circuits/miami', '/history', '/stats'])('%s renders', async (path) => {
+  it.each(['/circuits', '/circuits/suzuka', '/circuits/miami', '/history', '/stats', '/drivers/rag', '/drivers/ben'])('%s renders', async (path) => {
     await renderAt(path);
     expect(document.querySelector('h1')).toBeTruthy();
   });

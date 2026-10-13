@@ -123,7 +123,7 @@ export function History() {
                   return (
                     <tr key={l.id}>
                       <td className="muted" style={{ fontSize: 13 }}>{fmtDateTime(l.recorded_at)}</td>
-                      <td><span className="player-name" style={{ color: p?.colour_hex }}>{p?.name}</span></td>
+                      <td>{p ? <Link to={`/drivers/${p.slug}`} className="player-name" style={{ color: p.colour_hex, textDecoration: 'none' }}>{p.name}</Link> : null}</td>
                       <td>{c ? <Link to={`/circuits/${c.slug}`} style={{ textDecoration: 'none' }}>{c.short_name}</Link> : '—'}</td>
                       <td className="t">{formatLapTime(l.lap_time_ms)}</td>
                       <td className="mono muted">{pb ? (pb.id === l.id ? 'Current PB' : formatGap(l.lap_time_ms - pb.lap_time_ms)) : '—'}</td>

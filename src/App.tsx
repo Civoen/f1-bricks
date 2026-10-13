@@ -7,6 +7,7 @@ import { DEMO_MODE } from './lib/config';
 import { CircuitDetail } from './pages/CircuitDetail';
 import { Circuits } from './pages/Circuits';
 import { Dashboard } from './pages/Dashboard';
+import { DriverDetail } from './pages/DriverDetail';
 import { History } from './pages/History';
 import { LogLap } from './pages/LogLap';
 import { Stats } from './pages/Stats';
@@ -22,6 +23,7 @@ function Shell() {
           <Route path="log" element={<LogLap />} />
           <Route path="circuits" element={<Circuits />} />
           <Route path="circuits/:slug" element={<CircuitDetail />} />
+          <Route path="drivers/:slug" element={<DriverDetail />} />
           <Route path="history" element={<History />} />
           <Route path="stats" element={<Stats />} />
           <Route path="*" element={<Navigate to="/" replace />} />

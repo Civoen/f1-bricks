@@ -48,7 +48,7 @@ export function Dashboard() {
               {standings.map((s, i) => (
                 <span key={s.player.id}>
                   {i > 0 && ' · '}
-                  <span style={{ color: s.player.colour_hex, fontWeight: 700 }}>{s.player.name} {s.records}</span>
+                  <Link to={`/drivers/${s.player.slug}`} style={{ color: s.player.colour_hex, fontWeight: 700, textDecoration: 'none' }}>{s.player.name} {s.records}</Link>
                 </span>
               ))}
               {threatCount > 0 && <>{' · '}<span className="threat-text" title={`Records with a rival within ${THREAT_MS / 1000}s`}>{threatCount} under threat</span></>}
@@ -64,11 +64,9 @@ export function Dashboard() {
             const threat = threatFor(s);
             return (
               <li key={s.circuit.id} style={{ ['--i' as string]: i }}>
-                <Link
-                  to={`/circuits/${s.circuit.slug}`}
-                  className={`tower-row${s.circuit.id === featured?.circuit.id ? ' current' : ''}${s.record ? '' : ' empty'}`}
-                  aria-label={`Round ${i + 1}, ${s.circuit.short_name}: ${s.record && holder ? `record ${formatLapTime(s.record.lap_time_ms)} by ${holder.name}` : ''}${threat ? `, under threat from ${threat.challenger.player.name}` : ''}`}
-                >
+                <div className={`tower-row${s.circuit.id === featured?.circuit.id ? ' current' : ''}${s.record ? '' : ' empty'}`}>
+                  <Link to={`/circuits/${s.circuit.slug}`} className="row-link"
+                    aria-label={`Round ${i + 1}, ${s.circuit.short_name}: ${s.record && holder ? `record ${formatLapTime(s.record.lap_time_ms)} by ${holder.name}` : ''}${threat ? `, under threat from ${threat.challenger.player.name}` : ''}`} />
                   <span className="rnd" style={holder ? { background: holder.colour_hex, borderColor: holder.colour_hex, color: '#0A0A0C' } : undefined}>
                     {String(i + 1).padStart(2, '0')}
                   </span>
@@ -77,9 +75,11 @@ export function Dashboard() {
                     <b style={{ color: s.record ? undefined : 'var(--muted)' }}>{s.circuit.short_name}</b>
                     <span>{s.circuit.country}</span>
                   </span>
-                  <span className="rec" style={{ color: s.record ? undefined : 'var(--muted)' }}>
+                  <Link to={`/log?circuit=${s.circuit.slug}`} className="rec rec-link" title={`Log a lap at ${s.circuit.short_name}`}
+                    aria-label={`Log a lap at ${s.circuit.short_name}`}>
                     {s.record ? formatLapTime(s.record.lap_time_ms) : '—'}
-                  </span>
+                    <span className="rec-plus" aria-hidden="true">+</span>
+                  </Link>
                   <span className="chips">
                     {s.record && s.standings.map((st) => (
                       <span key={st.player.id} className={`chip${threat && threat.challenger.player.id === st.player.id ? ' chip-threat' : ''}`}
@@ -90,7 +90,7 @@ export function Dashboard() {
                       </span>
                     ))}
                   </span>
-                </Link>
+                </div>
               </li>
             );
           })}
@@ -138,11 +138,11 @@ function Hero({ summary, reason }: { summary: CircuitSummary; reason: string | n
         ) : null}
         <div className="pb-tiles">
           {s.standings.map((st) => (
-            <div key={st.player.id} className="pb-tile rise" style={{ animationDelay: `${350 + s.standings.indexOf(st) * 60}ms`, borderTopColor: st.lap ? st.player.colour_hex : 'var(--border)' }}>
+            <Link to={`/drivers/${st.player.slug}`} key={st.player.id} className="pb-tile rise" style={{ animationDelay: `${350 + s.standings.indexOf(st) * 60}ms`, borderTopColor: st.lap ? st.player.colour_hex : 'var(--border)' }}>
               <div className="who" style={{ color: st.player.colour_hex }}>{st.player.name}</div>
               <div className="t" style={{ color: st.lap ? undefined : 'var(--muted)' }}>{st.lap ? formatLapTime(st.lap.lap_time_ms) : 'No time'}</div>
               <div className="g">{!st.lap ? 'not set' : st.position === 1 ? 'P1' : formatGap(st.gapMs ?? 0)}</div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>
