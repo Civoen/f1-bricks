@@ -320,10 +320,11 @@ describe('Discord record alerts (optional)', () => {
 });
 
 describe('upgrading an existing database', () => {
-  it('a version 1 database keeps its laps and gets the new colours (Rag green, Ben orange)', async () => {
+  it('a version 1 database keeps its laps and gets the updates (Rag green, Ben orange, COTA shown as Austin)', async () => {
     const old = new DatabaseSync(':memory:');
     for (const q of SCHEMA) old.exec(q);
     old.exec(`UPDATE players SET colour_hex = '#FF8A24' WHERE slug = 'rag'; UPDATE players SET colour_hex = '#35C878' WHERE slug = 'ben';
+              UPDATE circuits SET short_name = 'COTA' WHERE slug = 'cota';
               INSERT INTO meta (key, value) VALUES ('schema_version', '1');
               INSERT INTO lap_entries (id, player_id, circuit_id, lap_time_ms, recorded_at)
                 SELECT 'lap-1', p.id, c.id, 89000, '2026-10-01T20:00:00.000Z' FROM players p, circuits c WHERE p.slug = 'rag' AND c.slug = 'suzuka';`);
@@ -332,7 +333,8 @@ describe('upgrading an existing database', () => {
     const colours = Object.fromEntries(body.players.map((p: any) => [p.slug, p.colour_hex]));
     expect(colours).toEqual({ rag: '#35C878', adam: '#398BFF', ben: '#FF8A24' });
     expect(body.laps).toHaveLength(1);
-    expect((old.prepare(`SELECT value FROM meta WHERE key = 'schema_version'`).get() as any).value).toBe('2');
+    expect(body.circuits.find((c: any) => c.slug === 'cota').short_name).toBe('Austin');
+    expect((old.prepare(`SELECT value FROM meta WHERE key = 'schema_version'`).get() as any).value).toBe('3');
     old.close();
   });
 });

@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { DEMO_MODE } from '../lib/config';
 import { useData } from '../state/data';
+import { openShortcuts, Shortcuts } from './Shortcuts';
 import { HomeIcon, LapsIcon, LogIcon, Logo, StatsIcon, TracksIcon } from './Icons';
 
 interface NavItem { to: string; label: string; icon: JSX.Element; end?: boolean; log?: boolean }
@@ -40,7 +41,12 @@ export function Layout() {
             {n.label}
           </NavLink>
         ))}
+        <button type="button" className="rail-link rail-keys" onClick={openShortcuts} aria-label="Keyboard shortcuts" title="Keyboard shortcuts (?)">
+          <span className="kbd-mark" aria-hidden="true">?</span>
+          KEYS
+        </button>
       </nav>
+      <Shortcuts />
 
       <div className="main" ref={mainRef}>
         {DEMO_MODE && (

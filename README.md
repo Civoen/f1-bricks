@@ -13,7 +13,7 @@ A web app and installable PWA for Rag, Adam and Ben (The Bricks) to log F1 25 ti
 | Page | What it does |
 |---|---|
 | **Home** | Featured circuit (whichever was most recently viewed on this device or had a lap logged, corrected or deleted by anyone), real track outline with real sector lines (a white dot laps it at real F1 pace, scaled to exactly the record time), record and PBs. Tap a time in the timing tower to log a lap at that track. The timing tower lists all 24 rounds in 2025 calendar order on one screen; rivals within 0.100s of a record are highlighted as **under threat**. |
-| **Log** | Pick driver and circuit, then just type the digits (`128750` → `1:28.750`). Shows the record and the driver's PB to beat, previews whether the lap is a record/PB/tie, confirms after saving, and offers **Undo** and a **record card**. |
+| **Log** | Pick driver and circuit, then just type the digits (`128750` → `1:28.750`). The date defaults to now, with one-tap **Yesterday** or **Pick date**. Shows the record and the driver's PB to beat, previews whether the lap is a record/PB/tie, confirms after saving, and offers **Undo** and a **record card**. |
 | **Tracks** | Every circuit with search, filters (record holder, missing times, no laps) and sorting (calendar, A–Z, closest fight, most recently broken). |
 | **Circuit page** | Record, PB leaderboard with millisecond gaps, a record timeline (including corrected history), a PB progression chart, recent laps, and a **Share record card** button. |
 | **Laps** | Full lap history with filters, pagination, and correcting or deleting a lap. |
@@ -87,6 +87,26 @@ When a lap takes a circuit record, the site can post it to a Discord channel:
 2. In Cloudflare: your Pages project → **Settings → Variables and Secrets → Add**. Type **Secret**, name **`DISCORD_WEBHOOK_URL`**, value the webhook URL. Save, then retry the latest deployment.
 
 Delete the secret (and redeploy) to stop alerts. Alerts go out for new records only (not corrections), link back to the circuit page, and a failed post never stops a lap being saved.
+
+## Keyboard shortcuts (desktop)
+
+Press **?** anywhere to see them all, or click **KEYS** at the bottom of the sidebar.
+
+| Keys | Does |
+|---|---|
+| `L` | Log a lap (or jump to the time box when already there) |
+| `G` then `H` / `T` / `L` / `S` / `D` | Home, Tracks, Laps, Stats, your driver page |
+| `/` | Search tracks |
+| On Log a lap: `R` `A` `B` | Pick the driver |
+| On Log a lap: `[` `]` (or ← →) | Previous / next track |
+| On Log a lap: digits, `Enter` | Type the time and save |
+| `N` | Log another, after saving |
+
+So `L` `R` `]` `128750` `Enter` logs 1:28.750 for Rag at the next track.
+
+## Celebrations
+
+Beating a time gets a short broadcast-style moment: the three sector lights fill in (F1 purple for a new circuit record, the driver's colour for a new PB), the logo's slanted stripes sweep across and the time wipes in. Phones that support it give a short vibration (iPhones don't let websites vibrate). Tap or press any key to skip it. People who turn on "reduce motion" get a still version.
 
 ## Record cards
 

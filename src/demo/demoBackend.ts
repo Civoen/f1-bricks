@@ -33,7 +33,7 @@ const CIRCUIT_ROWS: [string, string, string, string, string, number | null][] = 
   ['monza', 'Autodromo Nazionale Monza', 'Monza', 'ITA', 'Italy', 80400],
   ['baku', 'Baku City Circuit', 'Baku', 'AZE', 'Azerbaijan', 102700],
   ['marina-bay', 'Marina Bay Street Circuit', 'Marina Bay', 'SGP', 'Singapore', 95100],
-  ['cota', 'Circuit of the Americas', 'COTA', 'USA', 'United States', 93200],
+  ['cota', 'Circuit of the Americas', 'Austin', 'USA', 'United States', 93200],
   ['mexico-city', 'Autódromo Hermanos Rodríguez', 'Mexico City', 'MEX', 'Mexico', 76000],
   ['interlagos', 'Autódromo José Carlos Pace', 'Interlagos', 'BRA', 'Brazil', 70400],
   ['las-vegas', 'Las Vegas Strip Circuit', 'Las Vegas', 'LVG', 'United States', 92800],

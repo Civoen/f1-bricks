@@ -18,7 +18,8 @@ export function Modal({ label, accent, onClose, children }: Props) {
     const focusables = () =>
       Array.from(node?.querySelectorAll<HTMLElement>('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])') ?? [])
         .filter((el) => !el.hasAttribute('disabled'));
-    focusables()[0]?.focus();
+    // A control marked data-autofocus gets focus first (e.g. the safe default action).
+    (node?.querySelector<HTMLElement>('[data-autofocus]') ?? focusables()[0])?.focus();
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
       if (e.key === 'Tab') {

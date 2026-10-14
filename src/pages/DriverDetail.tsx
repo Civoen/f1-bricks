@@ -79,14 +79,14 @@ export function DriverDetail() {
           <div className="eyebrow">Driver · {champ ? `P${champ.position} in the championship` : 'Championship'}</div>
           <h1 className="page-title" style={{ color: player.colour_hex }}>{player.name}</h1>
         </div>
-        <div role="group" aria-label="Other drivers" style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+        <div role="group" aria-label="Other drivers" className="pill-row">
           {players.map((p) => (
             <Link key={p.id} to={`/drivers/${p.slug}`} className="pill" aria-current={p.id === player.id ? 'page' : undefined}
               aria-pressed={p.id === player.id} style={{ textDecoration: 'none' }}>
               <span className="dot" style={{ background: p.colour_hex, marginRight: 6 }} />{p.name}
             </Link>
           ))}
-          <Link to={`/log?driver=${player.slug}`} className="btn btn-primary btn-sm" style={{ marginLeft: 6 }}>LOG A LAP</Link>
+          <Link to={`/log?driver=${player.slug}`} className="btn btn-primary btn-sm hide-sm" style={{ marginLeft: 6 }}>LOG A LAP</Link>
         </div>
       </div>
 
@@ -153,7 +153,7 @@ export function DriverDetail() {
       <section className="card" aria-labelledby="pbs-title" style={{ marginBottom: 16 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12, flexWrap: 'wrap' }}>
           <h2 id="pbs-title">Every circuit</h2>
-          <div role="group" aria-label="Sort" style={{ display: 'flex', gap: 6 }}>
+          <div role="group" aria-label="Sort" className="pill-row">
             {([['calendar', 'Calendar'], ['strongest', 'Strongest first'], ['weakest', 'Weakest first']] as [Sort, string][]).map(([k, label]) => (
               <button key={k} type="button" className="pill" aria-pressed={sort === k} onClick={() => setSort(k)}>{label}</button>
             ))}
@@ -162,7 +162,7 @@ export function DriverDetail() {
         <div className="table-scroll">
           <table className="table driver-table">
             <thead>
-              <tr><th scope="col">Rnd</th><th scope="col">Circuit</th><th scope="col">PB</th><th scope="col">Pos</th><th scope="col">Lead / gap</th><th scope="col">Set</th><th scope="col"><span className="sr-only">Log</span></th></tr>
+              <tr><th scope="col" className="hide-sm">Rnd</th><th scope="col">Circuit</th><th scope="col">PB</th><th scope="col">Pos</th><th scope="col">Lead / gap</th><th scope="col" className="hide-sm">Set</th><th scope="col" className="hide-sm"><span className="sr-only">Log</span></th></tr>
             </thead>
             <tbody>
               {sorted.map((r) => {
@@ -170,7 +170,7 @@ export function DriverDetail() {
                 const mine = r.me?.position === 1 && r.me.lap;
                 return (
                   <tr key={r.s.circuit.id}>
-                    <td><span className="rnd" style={holder ? { background: holder.colour_hex, borderColor: holder.colour_hex, color: '#0A0A0C' } : undefined}>{String(r.s.circuit.display_order).padStart(2, '0')}</span></td>
+                    <td className="hide-sm"><span className="rnd" style={holder ? { background: holder.colour_hex, borderColor: holder.colour_hex, color: '#0A0A0C' } : undefined}>{String(r.s.circuit.display_order).padStart(2, '0')}</span></td>
                     <td>
                       <Link to={`/circuits/${r.s.circuit.slug}`} className="driver-circuit">
                         <TrackOutline slug={r.s.circuit.slug} colour={mine ? player.colour_hex : '#4A4A52'} />
@@ -181,10 +181,10 @@ export function DriverDetail() {
                     <td className="mono">{r.me?.lap ? <span style={{ color: mine ? player.colour_hex : undefined, fontWeight: 700 }}>P{r.me.position}</span> : '—'}</td>
                     <td className="mono">
                       {mine ? (r.leadMs !== null ? <span style={{ color: player.colour_hex }}>−{formatSeconds(r.leadMs)}</span> : <span className="muted">only time</span>)
-                        : r.gapMs !== null ? <>{formatGap(r.gapMs)} <span className="muted" style={{ fontSize: 12 }}>to {holder?.name}</span></> : ''}
+                        : r.gapMs !== null ? <>{formatGap(r.gapMs)} <span className="muted hide-sm" style={{ fontSize: 12 }}>to {holder?.name}</span></> : ''}
                     </td>
-                    <td className="muted" style={{ fontSize: 13 }}>{r.me?.lap ? fmtDate(r.me.lap.recorded_at) : ''}</td>
-                    <td style={{ textAlign: 'right' }}>
+                    <td className="muted hide-sm" style={{ fontSize: 13 }}>{r.me?.lap ? fmtDate(r.me.lap.recorded_at) : ''}</td>
+                    <td className="hide-sm" style={{ textAlign: 'right' }}>
                       <Link to={`/log?circuit=${r.s.circuit.slug}&driver=${player.slug}`} className="btn btn-sm" aria-label={`Log a lap at ${r.s.circuit.short_name}`}>Log</Link>
                     </td>
                   </tr>

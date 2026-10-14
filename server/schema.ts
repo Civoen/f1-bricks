@@ -10,7 +10,7 @@
  */
 
 /** Bump this and add an entry to MIGRATIONS to change an existing database. */
-export const SCHEMA_VERSION = 2;
+export const SCHEMA_VERSION = 3;
 
 const NOW = "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))";
 const UUID = '(lower(hex(randomblob(16))))';
@@ -126,7 +126,7 @@ export const SCHEMA: string[] = [
     ('monza',         'Autodromo Nazionale Monza',          'Monza',         'ITA', 'Italy',         16),
     ('baku',          'Baku City Circuit',                  'Baku',          'AZE', 'Azerbaijan',    17),
     ('marina-bay',    'Marina Bay Street Circuit',          'Marina Bay',    'SGP', 'Singapore',     18),
-    ('cota',          'Circuit of the Americas',            'COTA',          'USA', 'United States', 19),
+    ('cota',          'Circuit of the Americas',            'Austin',        'USA', 'United States', 19),
     ('mexico-city',   'Autódromo Hermanos Rodríguez',       'Mexico City',   'MEX', 'Mexico',        20),
     ('interlagos',    'Autódromo José Carlos Pace',         'Interlagos',    'BRA', 'Brazil',        21),
     ('las-vegas',     'Las Vegas Strip Circuit',            'Las Vegas',     'LVG', 'United States', 22),
@@ -144,5 +144,7 @@ export const MIGRATIONS: Record<number, string[]> = {
   2: [
     `UPDATE players SET colour_hex = '#35C878' WHERE slug = 'rag'`,
     `UPDATE players SET colour_hex = '#FF8A24' WHERE slug = 'ben'`
-  ]
+  ],
+  // v3: Circuit of the Americas is shown as "Austin".
+  3: [`UPDATE circuits SET short_name = 'Austin' WHERE slug = 'cota'`]
 };

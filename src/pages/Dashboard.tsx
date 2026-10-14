@@ -54,7 +54,7 @@ export function Dashboard() {
               {threatCount > 0 && <>{' · '}<span className="threat-text" title={`Records with a rival within ${THREAT_MS / 1000}s`}>{threatCount} under threat</span></>}
             </div>
           </div>
-          <Link to="/log" className="btn btn-primary">LOG A LAP</Link>
+          <Link to="/log" className="btn btn-primary hide-sm">LOG A LAP</Link>
         </div>
 
         <ol className="tower-list">

@@ -62,7 +62,7 @@ describe('main flows', () => {
 
     fireEvent.change(input, { target: { value: '125500' } });
     expect(input.value).toBe('1:25.500');
-    expect(screen.getByText('NEW CIRCUIT RECORD')).toBeTruthy(); // well under every demo time at Miami
+    expect(screen.getAllByText('NEW CIRCUIT RECORD').length).toBeGreaterThan(0); // well under every demo time at Miami
     expect(save.hasAttribute('disabled')).toBe(false);
 
     await act(async () => { fireEvent.click(save); });
@@ -92,5 +92,44 @@ describe('main flows', () => {
     const del = await screen.findByRole('dialog', { name: 'Delete lap' });
     await act(async () => { fireEvent.click(within(del).getByRole('button', { name: 'Delete lap' })); });
     await waitFor(() => expect(screen.getAllByRole('row').length).toBe(before - 1), { timeout: 3000 });
+  });
+
+  it('logs a lap from the keyboard, celebrates, and N logs another', async () => {
+    await renderAt('/log?circuit=miami');
+    const key = (k: string) => act(async () => { fireEvent.keyDown(window, { key: k }); });
+    await key('b'); // Ben
+    expect(screen.getByRole('button', { name: /BEN/, pressed: true })).toBeTruthy();
+    await key(']'); // next track: Imola
+    expect(screen.getByRole('button', { name: /Imola/, pressed: true })).toBeTruthy();
+    await key('['); // back to Miami
+    for (const d of '125500') await key(d);
+    expect((screen.getByLabelText('Lap time') as HTMLInputElement).value).toBe('1:25.500');
+    // The time box now has focus; Enter there submits the form.
+    await act(async () => { fireEvent.submit(screen.getByRole('form', { name: 'Log a lap' })); });
+    await screen.findByRole('dialog', { name: 'Lap saved' }, { timeout: 3000 });
+    const cel = document.querySelector('.celebrate');
+    expect(cel?.getAttribute('aria-label')).toMatch(/^New circuit record: Ben, 1:25.500 at Miami/);
+    await key('Escape'); // skips the celebration only
+    await waitFor(() => expect(document.querySelector('.celebrate')).toBeNull());
+    expect(screen.getByRole('dialog', { name: 'Lap saved' })).toBeTruthy();
+    await key('n');
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    expect((screen.getByLabelText('Lap time') as HTMLInputElement).value).toBe('');
+  });
+
+  it('quick date buttons: Now by default, Yesterday, or a picked date', async () => {
+    await renderAt('/log');
+    expect(screen.getByRole('button', { name: 'Now', pressed: true })).toBeTruthy();
+    expect(screen.queryByLabelText('Date and time the lap was set')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Pick date' }));
+    expect(screen.getByLabelText('Date and time the lap was set')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Yesterday' }));
+    expect(screen.queryByLabelText('Date and time the lap was set')).toBeNull();
+  });
+
+  it('? opens the keyboard shortcuts', async () => {
+    await renderAt('/');
+    await act(async () => { fireEvent.keyDown(window, { key: '?' }); });
+    expect(await screen.findByRole('dialog', { name: 'Keyboard shortcuts' })).toBeTruthy();
   });
 });

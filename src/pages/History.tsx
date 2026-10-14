@@ -70,7 +70,7 @@ export function History() {
           <div className="eyebrow">{snapshot.laps.length} laps logged · times shown in {TIME_ZONE}</div>
           <h1 className="page-title">Lap history</h1>
         </div>
-        <Link to="/log" className="btn btn-primary">LOG A LAP</Link>
+        <Link to="/log" className="btn btn-primary hide-sm">LOG A LAP</Link>
       </div>
 
       <div className="filters">
@@ -84,11 +84,11 @@ export function History() {
           <option value="">All circuits</option>
           {circuits.map((c) => <option key={c.id} value={c.slug}>{c.short_name}</option>)}
         </select>
-        <label className="muted" htmlFor="h-from" style={{ fontSize: 13 }}>From</label>
+        <label className="muted hide-sm" htmlFor="h-from" style={{ fontSize: 13 }}>From</label>
         <input id="h-from" className="input" type="date" value={from} onChange={(e) => set('from', e.target.value)} />
-        <label className="muted" htmlFor="h-to" style={{ fontSize: 13 }}>to</label>
+        <label className="muted hide-sm" htmlFor="h-to" style={{ fontSize: 13 }}>to</label>
         <input id="h-to" className="input" type="date" value={to} onChange={(e) => set('to', e.target.value)} />
-        <div role="group" aria-label="Show" style={{ display: 'flex', gap: 6 }}>
+        <div role="group" aria-label="Show" className="pill-row">
           <button type="button" className="pill" aria-pressed={only === 'pb'} onClick={() => set('only', only === 'pb' ? '' : 'pb')}>PB laps</button>
           <button type="button" className="pill" aria-pressed={only === 'record'} onClick={() => set('only', only === 'record' ? '' : 'record')}>Record laps</button>
         </div>
@@ -106,7 +106,7 @@ export function History() {
       ) : (
         <>
           <div className="table-scroll">
-            <table className="table history-table">
+            <table className="table history-table cardify">
               <thead>
                 <tr>
                   <th scope="col">Set</th><th scope="col">Driver</th><th scope="col">Circuit</th><th scope="col">Time</th>
@@ -122,18 +122,18 @@ export function History() {
                   const label = `${p?.name} · ${c?.short_name} · ${formatLapTime(l.lap_time_ms)} · ${fmtDateTime(l.recorded_at)}`;
                   return (
                     <tr key={l.id}>
-                      <td className="muted" style={{ fontSize: 13 }}>{fmtDateTime(l.recorded_at)}</td>
-                      <td>{p ? <Link to={`/drivers/${p.slug}`} className="player-name" style={{ color: p.colour_hex, textDecoration: 'none' }}>{p.name}</Link> : null}</td>
-                      <td>{c ? <Link to={`/circuits/${c.slug}`} style={{ textDecoration: 'none' }}>{c.short_name}</Link> : '—'}</td>
-                      <td className="t">{formatLapTime(l.lap_time_ms)}</td>
-                      <td className="mono muted">{pb ? (pb.id === l.id ? 'Current PB' : formatGap(l.lap_time_ms - pb.lap_time_ms)) : '—'}</td>
-                      <td>
+                      <td className="muted c-set" style={{ fontSize: 13 }}>{fmtDateTime(l.recorded_at)}</td>
+                      <td className="c-driver">{p ? <Link to={`/drivers/${p.slug}`} className="player-name" style={{ color: p.colour_hex, textDecoration: 'none' }}>{p.name}</Link> : null}</td>
+                      <td className="c-circuit">{c ? <Link to={`/circuits/${c.slug}`} style={{ textDecoration: 'none' }}>{c.short_name}</Link> : '—'}</td>
+                      <td className="t c-time">{formatLapTime(l.lap_time_ms)}</td>
+                      <td className="mono muted c-gap">{pb ? (pb.id === l.id ? 'Current PB' : formatGap(l.lap_time_ms - pb.lap_time_ms)) : '—'}</td>
+                      <td className="c-tag">
                         {a?.recordAtTime ? <span className="tag tag-record">Record</span>
                           : a?.pbAtTime ? <span className="tag tag-pb">PB</span>
                           : <span className="muted">—</span>}
                       </td>
-                      <td className="notes">{l.notes}</td>
-                      <td style={{ textAlign: 'right' }}>
+                      <td className={`notes c-notes${l.notes ? '' : ' is-empty'}`}>{l.notes}</td>
+                      <td className="c-actions" style={{ textAlign: 'right' }}>
                         <div style={{ display: 'inline-flex', gap: 6 }}>
                           <button type="button" className="btn btn-icon" aria-label={`Correct ${label}`} onClick={() => setEditing(l)}><EditIcon /></button>
                           <button type="button" className="btn btn-icon btn-danger" aria-label={`Delete ${label}`} onClick={() => setDeleting(l)}><TrashIcon /></button>

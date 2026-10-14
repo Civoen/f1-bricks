@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { ProgressionChart } from '../components/ProgressionChart';
 import { EmptyState, ErrorState, LoadingState } from '../components/States';
 import { TrackOutline } from '../components/TrackOutline';
-import { fmtDate, fmtDateTime } from '../lib/format';
+import { fmtDate, fmtDateTime, fmtDay } from '../lib/format';
 import { heroNameClass } from '../lib/format';
 import { formatLapTime, formatSeconds } from '../lib/laptime';
 import { markViewed } from '../lib/recentCircuit';
@@ -39,7 +39,7 @@ export function CircuitDetail() {
     <div className="page">
       <div className="page-head" style={{ marginBottom: 8 }}>
         <Link to="/circuits" className="muted" style={{ fontSize: 13, textDecoration: 'none' }}>← All circuits</Link>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        <div className="detail-actions">
           <ShareRecordButton summary={s} />
           <Link to={`/log?circuit=${circuit.slug}`} className="btn btn-primary">LOG A LAP HERE</Link>
         </div>
@@ -84,7 +84,7 @@ export function CircuitDetail() {
         <section className="card" aria-labelledby="pb-title">
           <h2 id="pb-title">Personal bests</h2>
           <table className="table">
-            <thead><tr><th scope="col">Pos</th><th scope="col">Driver</th><th scope="col">PB</th><th scope="col">Gap</th><th scope="col">Set</th></tr></thead>
+            <thead><tr><th scope="col">Pos</th><th scope="col">Driver</th><th scope="col">PB</th><th scope="col">Gap</th><th scope="col" className="hide-sm">Set</th></tr></thead>
             <tbody>
               {s.standings.map((st) => (
                 <tr key={st.player.id}>
@@ -94,9 +94,9 @@ export function CircuitDetail() {
                   <td className="mono">
                     {!st.lap ? '' : st.position === 1 ? 'Leader'
                       : st.tiedWithLeader ? <span title="Identical time, set later">+0.000 (tie)</span>
-                      : <>+{formatSeconds(st.gapMs ?? 0)} <span className="muted" style={{ fontSize: 11 }}>({st.gapMs} ms)</span></>}
+                      : <>+{formatSeconds(st.gapMs ?? 0)} <span className="muted hide-sm" style={{ fontSize: 11 }}>({st.gapMs} ms)</span></>}
                   </td>
-                  <td className="muted" style={{ fontSize: 13 }}>{st.lap ? fmtDate(st.lap.recorded_at) : ''}</td>
+                  <td className="muted hide-sm" style={{ fontSize: 13 }}>{st.lap ? fmtDate(st.lap.recorded_at) : ''}</td>
                 </tr>
               ))}
             </tbody>
@@ -137,14 +137,14 @@ export function CircuitDetail() {
         {recent.length > 0 && (
           <div style={{ overflowX: 'auto' }}>
             <table className="table">
-              <thead><tr><th scope="col">Set</th><th scope="col">Driver</th><th scope="col">Time</th><th scope="col">At the time</th></tr></thead>
+              <thead><tr><th scope="col">Set</th><th scope="col">Driver</th><th scope="col">Time</th><th scope="col"><span className="hide-sm">At the time</span></th></tr></thead>
               <tbody>
                 {recent.map((l) => {
                   const p = playerById.get(l.player_id);
                   const a = annotations.get(l.id);
                   return (
                     <tr key={l.id}>
-                      <td className="muted" style={{ fontSize: 13, whiteSpace: 'nowrap' }}>{fmtDateTime(l.recorded_at)}</td>
+                      <td className="muted" style={{ fontSize: 13, whiteSpace: 'nowrap' }}><span className="hide-sm">{fmtDateTime(l.recorded_at)}</span><span className="show-sm">{fmtDay(l.recorded_at)}</span></td>
                       <td><span className="player-name" style={{ color: p?.colour_hex }}>{p?.name}</span></td>
                       <td className="t">{formatLapTime(l.lap_time_ms)}</td>
                       <td>{a?.recordAtTime ? <span className="tag tag-record">Record</span> : a?.pbAtTime ? <span className="tag tag-pb">PB</span> : <span className="muted">—</span>}</td>

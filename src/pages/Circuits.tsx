@@ -41,13 +41,13 @@ export function Circuits() {
           <div className="eyebrow">{summaries.length} circuits · {summaries.filter((s) => s.allThreeSet).length} with all three times</div>
           <h1 className="page-title">Circuits</h1>
         </div>
-        <Link to="/log" className="btn btn-primary">LOG A LAP</Link>
+        <Link to="/log" className="btn btn-primary hide-sm">LOG A LAP</Link>
       </div>
 
       <div className="filters" role="search">
         <label className="sr-only" htmlFor="circuit-search">Search circuits</label>
         <input id="circuit-search" className="input" type="search" placeholder="Search circuits" value={q} onChange={(e) => setQ(e.target.value)} style={{ minWidth: 200 }} />
-        <div role="group" aria-label="Filter" style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+        <div role="group" aria-label="Filter" className="pill-row">
           <button type="button" className="pill" aria-pressed={filter === 'all'} onClick={() => setFilter('all')}>All</button>
           {players.map((p) => (
             <button key={p.id} type="button" className="pill" aria-pressed={filter === `holder:${p.id}`} onClick={() => setFilter(`holder:${p.id}`)}>
@@ -92,7 +92,7 @@ export function Circuits() {
                     <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
                       <span className="rec num">{formatLapTime(s.record.lap_time_ms)}</span>
                       <span className="holder-tag" style={{ background: holder.colour_hex }}>{holder.name}</span>
-                      <span className="muted" style={{ fontSize: 12 }}>{fmtDay(s.record.recorded_at)}</span>
+                      <span className="muted cc-date" style={{ fontSize: 12 }}>{fmtDay(s.record.recorded_at)}</span>
                       {threat && <span className="threat-tag" title={`${threat.challenger.player.name} is ${formatSeconds(threat.gapMs)}s away`}>Under threat</span>}
                     </div>
                     <div className="pbs-mini">
@@ -106,7 +106,7 @@ export function Circuits() {
                         </div>
                       ))}
                     </div>
-                    <div className="muted" style={{ fontSize: 12, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                    <div className="muted cc-foot" style={{ fontSize: 12, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
                       <span>{s.lapCount} lap{s.lapCount === 1 ? '' : 's'} logged</span>
                       <span>{s.allThreeSet ? 'All three set' : `${players.length - s.playersWithTimes} missing`}</span>
                     </div>

@@ -4,6 +4,8 @@ import { CloseIcon } from '../components/Icons';
 import { Modal } from '../components/Modal';
 import { ErrorState, LoadingState } from '../components/States';
 import { ShareRecordButton } from '../components/ShareRecordButton';
+import { Celebration, type CelebrationData } from '../components/Celebration';
+import { dialogOpen, isTyping } from '../components/Shortcuts';
 import { TrackOutline } from '../components/TrackOutline';
 import { friendlyError } from '../lib/backend';
 import { fromLocalInput, heroNameClass, toLocalInput } from '../lib/format';
@@ -13,6 +15,8 @@ import type { Lap, LogLapResult } from '../lib/types';
 import { useData } from '../state/data';
 
 // The device remembers the last driver picked, so each person's phone defaults to them.
+type WhenMode = 'now' | 'yesterday' | 'pick';
+
 const LAST_DRIVER_KEY = 'f1-bricks:last-driver';
 function readLastDriver(): string | null {
   try { return window.localStorage.getItem(LAST_DRIVER_KEY); } catch { return null; }
@@ -34,11 +38,15 @@ export function LogLap() {
   const [timeText, setTimeText] = useState('');
   const [touched, setTouched] = useState(false);
   const [when, setWhen] = useState(() => toLocalInput(new Date()));
+  // When the lap was set rarely matters, so it's one tap: now (default), yesterday, or a picked date.
+  const [whenMode, setWhenMode] = useState<WhenMode>('now');
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [result, setResult] = useState<{ res: LogLapResult; ms: number; circuitId: string; circuitSlug: string; circuitName: string; text: string } | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [celebration, setCelebration] = useState<CelebrationData | null>(null);
+  const formRef = useRef<HTMLFormElement>(null);
   const requestId = useRef(newRequestId());
 
   // Defaults: the signed-in player, and the circuit from ?circuit= if given.
@@ -71,10 +79,10 @@ export function LogLap() {
 
   const complete = isCompleteLapTimeInput(timeText);
   const parsed: ParseResult = complete ? parseLapTime(timeText) : { ok: false, error: 'Type all six digits, e.g. 128750 for 1:28.750' };
-  const recordedAtIso = fromLocalInput(when);
-  const whenError = !recordedAtIso
+  const pickedIso = whenMode === 'pick' ? fromLocalInput(when) : null;
+  const whenError = whenMode !== 'pick' ? null : !pickedIso
     ? 'Enter when the lap was set'
-    : Date.parse(recordedAtIso) > Date.now() + 10 * 60_000
+    : Date.parse(pickedIso) > Date.now() + 10 * 60_000
       ? 'A lap can’t be set in the future'
       : null;
   // While typing, an incomplete time isn't an error; a complete but impossible one is.
@@ -87,6 +95,51 @@ export function LogLap() {
     return previewVerdict(summary.laps, playerId, parsed.ms);
   }, [summary, playerId, parsed.ok, parsed.ok ? parsed.ms : 0]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Keyboard: driver initials, [ ] to change track, digits go straight into the
+  // time, Enter saves, N logs another after saving. See components/Shortcuts.tsx.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey) return;
+      const k = e.key;
+      if (result) {
+        if (k.toLowerCase() === 'n' && !isTyping(e) && !document.querySelector('.celebrate')) { e.preventDefault(); logAnother(); }
+        return;
+      }
+      if (dialogOpen()) return;
+      const inTime = (e.target as HTMLElement | null)?.id === 'laptime';
+      if (isTyping(e) && !inTime) return;
+      // Driver initials work even while typing the time (letters can't be part of a time).
+      if (k.length === 1 && /[a-z]/i.test(k) && !/[gl]/i.test(k)) {
+        const p = players.find((x) => x.name[0]?.toLowerCase() === k.toLowerCase());
+        if (p) { e.preventDefault(); setPlayerId(p.id); }
+        return;
+      }
+      if (k === '[' || k === ']' || (!inTime && (k === 'ArrowLeft' || k === 'ArrowRight'))) {
+        e.preventDefault();
+        const i = summaries.findIndex((x) => x.circuit.id === circuitId);
+        const step = k === ']' || k === 'ArrowRight' ? 1 : -1;
+        const next = summaries[(Math.max(i, 0) + step + summaries.length) % summaries.length];
+        if (next) setCircuitId(next.circuit.id);
+        return;
+      }
+      if (inTime) return;
+      if (/^[0-9]$/.test(k)) {
+        e.preventDefault();
+        document.getElementById('laptime')?.focus();
+        setTimeText((t) => maskLapTimeInput(t.replace(/\D/g, '') + k));
+        setNotice(null);
+      } else if (k === 'Backspace') {
+        e.preventDefault();
+        setTimeText((t) => maskLapTimeInput(t.replace(/\D/g, '').slice(0, -1)));
+      } else if (k === 'Enter' && canSubmit) {
+        e.preventDefault();
+        formRef.current?.requestSubmit();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  });
+
   if (!snapshot && loading) return <LoadingState />;
   if (!snapshot) return <ErrorState message={error ?? 'Unknown error'} onRetry={() => void refresh()} />;
 
@@ -95,6 +148,9 @@ export function LogLap() {
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setTouched(true);
+    const recordedAtIso = whenMode === 'now' ? new Date().toISOString()
+      : whenMode === 'yesterday' ? new Date(Date.now() - 86_400_000).toISOString()
+      : pickedIso;
     if (!canSubmit || !parsed.ok || !recordedAtIso || !playerId || !circuitId || !summary) return;
     setSubmitting(true);
     setSubmitError(null);
@@ -107,6 +163,14 @@ export function LogLap() {
       if (slug) saveLastDriver(slug);
       setNotice(null);
       setResult({ res, ms: parsed.ms, circuitId: summary.circuit.id, circuitSlug: summary.circuit.slug, circuitName: summary.circuit.short_name, text: timeText });
+      const driver = playerById.get(playerId);
+      if (!res.duplicate && driver && (res.outcome === 'record' || res.outcome === 'pb')) {
+        setCelebration({
+          kind: res.outcome, timeMs: parsed.ms,
+          beatMs: res.outcome === 'record' ? res.previous_record_ms : res.previous_pb_ms,
+          driverName: driver.name, driverColour: driver.colour_hex, circuitName: summary.circuit.short_name
+        });
+      }
     } catch (err) {
       setSubmitError(friendlyError(err)); // form data is preserved for a retry
     } finally {
@@ -132,6 +196,7 @@ export function LogLap() {
     setNotes('');
     setTouched(false);
     setWhen(toLocalInput(new Date()));
+    setWhenMode('now');
   }
 
   // Board after this lap (preview only).
@@ -150,7 +215,7 @@ export function LogLap() {
 
   return (
     <div className="log-page">
-      <form className="log-form" onSubmit={onSubmit} aria-label="Log a lap" noValidate>
+      <form className="log-form" ref={formRef} onSubmit={onSubmit} aria-label="Log a lap" noValidate>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h1 className="page-title" style={{ fontSize: 44 }}>Log a lap</h1>
           <button type="button" className="btn btn-icon" style={{ width: 44, height: 44 }} aria-label="Close and return" onClick={() => navigate(-1)}>
@@ -187,7 +252,7 @@ export function LogLap() {
           </div>
         </fieldset>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 220px)', gap: 12, alignItems: 'start' }}>
+        <div className="time-row">
           <div className="field">
             <label htmlFor="laptime">Lap time</label>
             <input id="laptime" className="input time-input" type="text" inputMode="numeric" pattern="[0-9:.]*" autoComplete="off" spellCheck={false}
@@ -197,12 +262,32 @@ export function LogLap() {
               {timeError ?? 'Just type the digits — 128750 becomes 1:28.750.'}
             </div>
           </div>
-          <div className="field">
-            <label htmlFor="when">Set on</label>
-            <input id="when" className="input" type="datetime-local" value={when} onChange={(e) => setWhen(e.target.value)}
-              max={toLocalInput(new Date(Date.now() + 10 * 60_000))} style={{ height: 72 }} aria-invalid={Boolean(whenError)} aria-describedby="when-help" />
-            <div id="when-help" className={`help${whenError ? ' error' : ''}`}>{whenError ?? 'Defaults to now'}</div>
+          <fieldset className="field when-field">
+            <legend className="eyebrow" style={{ padding: 0, marginBottom: 8 }}>Set</legend>
+            <div className="when-options" role="group" aria-label="When the lap was set">
+              {([['now', 'Now'], ['yesterday', 'Yesterday'], ['pick', 'Pick date']] as [WhenMode, string][]).map(([m, label]) => (
+                <button key={m} type="button" className="when-btn" aria-pressed={whenMode === m}
+                  onClick={() => { setWhenMode(m); if (m === 'pick') setWhen(toLocalInput(new Date())); }}>{label}</button>
+              ))}
+            </div>
+            {whenMode === 'pick' && (
+              <>
+                <label htmlFor="when" className="sr-only">Date and time the lap was set</label>
+                <input id="when" className="input" type="datetime-local" value={when} onChange={(e) => setWhen(e.target.value)}
+                  max={toLocalInput(new Date(Date.now() + 10 * 60_000))} aria-invalid={Boolean(whenError)} aria-describedby="when-help" />
+                {whenError && <div id="when-help" className="help error">{whenError}</div>}
+              </>
+            )}
+          </fieldset>
+        </div>
+
+        {/* Phones: the outcome sits right under the time instead of in the side panel. */}
+        <div className="verdict verdict-inline show-sm" style={{ background: verdict.bg, color: verdict.fg }} aria-hidden="true">
+          <div>
+            <div className="vt" key={verdict.title}>{verdict.title}</div>
+            <div className="vs">{verdict.sub}</div>
           </div>
+          {verdict.delta && <div className="vd">{verdict.delta}</div>}
         </div>
 
         {summary && <TargetStrip summary={summary} playerId={playerId} />}
@@ -257,6 +342,7 @@ export function LogLap() {
         )}
       </section>
 
+      {celebration && <Celebration data={celebration} onDone={() => setCelebration(null)} />}
       {result && (
         <SavedModal result={result} onAnother={logAnother} onClose={logAnother} onUndo={undoLast} playerById={playerById}
           summary={summaryById.get(result.circuitId)} />
@@ -342,7 +428,7 @@ function SavedModal({ result, onAnother, onClose, onUndo, playerById, summary }:
         {undoError && <div className="help error" role="alert">Couldn’t undo: {undoError}</div>}
       </div>
       <div className="modal-actions">
-        <button type="button" onClick={onAnother}>Log another</button>
+        <button type="button" onClick={onAnother} data-autofocus>Log another</button>
         <Link to={`/circuits/${result.circuitSlug}`} className="primary">View circuit</Link>
       </div>
     </Modal>
@@ -357,7 +443,6 @@ const TILE_NAMES: Record<string, string> = {
   spa: 'Spa',
   zandvoort: 'Zandvoort',
   baku: 'Baku',
-  cota: 'Austin'
 };
 
 function tileLabel(s: CircuitSummary, all: CircuitSummary[]): string {
